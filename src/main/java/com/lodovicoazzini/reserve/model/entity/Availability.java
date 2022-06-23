@@ -13,18 +13,18 @@ public class Availability {
     @Column(name = "id", updatable = false)
     private Long id;
 
-    @Column(name = "start", nullable = false)
-    private Timestamp start;
+    @Column(name = "start_time", nullable = false)
+    private Timestamp startTime;
 
-    @Column(name = "end", nullable = false)
-    private Timestamp end;
+    @Column(name = "end_time", nullable = false)
+    private Timestamp endTime;
 
     public Availability() {
     }
 
     public Availability(Timestamp start, Timestamp end) {
-        this.start = start;
-        this.end = end;
+        this.startTime = start;
+        this.endTime = end;
     }
 
     public Long getId() {
@@ -35,24 +35,24 @@ public class Availability {
         this.id = id;
     }
 
-    public Timestamp getStart() {
-        return start;
+    public Timestamp getStartTime() {
+        return startTime;
     }
 
-    public void setStart(Timestamp start) {
-        this.start = start;
+    public void setStartTime(Timestamp start) {
+        this.startTime = start;
     }
 
-    public Timestamp getEnd() {
-        return end;
+    public Timestamp getEndTime() {
+        return endTime;
     }
 
-    public void setEnd(Timestamp end) {
-        this.end = end;
+    public void setEndTime(Timestamp end) {
+        this.endTime = end;
     }
 
     @Override
     public String toString() {
-        return "Availability{start=%s, end=%s}".formatted(start, end);
+        return "Availability{start=%s, end=%s}".formatted(startTime, endTime);
     }
 }
