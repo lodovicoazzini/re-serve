@@ -1,8 +1,5 @@
 package com.lodovicoazzini.reserve.model.entity;
 
-import org.mockito.internal.verification.Times;
-
-import javax.swing.text.html.Option;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +61,9 @@ public interface TimeSlot extends Comparable<TimeSlot> {
                 );
     }
 
-    default <T extends TimeSlot> Optional<T> getOverlap(final T other, final BiFunction<Timestamp, Timestamp, T> generator) {
+    default <T extends TimeSlot> Optional<T> getOverlap(
+            final T other,
+            final BiFunction<Timestamp, Timestamp, T> generator) {
         final Optional<TimeSlot> overlap = Optional.ofNullable(this.combine(
                 other,
                 (original) -> null,
@@ -84,12 +83,57 @@ public interface TimeSlot extends Comparable<TimeSlot> {
         }
     }
 
-    default <T extends TimeSlot> Optional<T> getOverlap(final List<T> others, final BiFunction<Timestamp, Timestamp, T> generator) {
+    default <T extends TimeSlot> Optional<T> getOverlap(
+            final List<T> others,
+            final BiFunction<Timestamp, Timestamp, T> generator) {
         // Find the overlap, otherwise null
         return others.stream()
                 .sorted()
                 .filter(other -> this.getOverlap(other, generator).isPresent())
                 .findFirst();
+    }
+
+    default <T extends TimeSlot> Optional<T> subtract(
+            final T other,
+            final BiFunction<Timestamp, Timestamp, T> generator) {
+        final Optional<TimeSlot> subtracted = Optional.ofNullable(this.combine(
+                other,
+                (original) -> original,
+                (first, second) -> {
+                    if (first.equals(second)) {
+                        // Same duration -> deleted
+                        return null;
+                    } else if (this.equals(first)) {
+                        // This comes first -> keep until the second starts
+                        return generator.apply(this.getStartTime(), second.getStartTime());
+                    } else {
+                        if (this.getEndTime().compareTo(first.getEndTime()) <= 0) {
+                            // The current slot is included in the other one -> deleted
+                            return null;
+                        } else {
+                            // The other comes first -> keep from the end of the other
+                            return generator.apply(first.getEndTime(), this.getEndTime());
+                        }
+                    }
+                }
+        ));
+        if (subtracted.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(generator.apply(subtracted.get().getStartTime(), subtracted.get().getEndTime()));
+        }
+    }
+
+    default <T extends TimeSlot> Optional<T> subtract(
+            final List<T> others,
+            final BiFunction<Timestamp, Timestamp, T> generator) {
+        // Combine the slots
+        return Optional.ofNullable(others.stream()
+                .sorted()
+                .reduce(
+                        generator.apply(this.getStartTime(), this.getEndTime()),
+                        (acc, other) -> acc.subtract(other, generator).orElse(null)
+                ));
     }
 
     @Override

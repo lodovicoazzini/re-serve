@@ -59,6 +59,16 @@ public class AvailabilityController {
         return new ResponseEntity<>(similar.size(), HttpStatus.OK);
     }
 
+    @GetMapping("subtract/{startTime}/{endTime}")
+    public ResponseEntity<Long> subtractAvailability(
+            @PathVariable("startTime") final String startTime,
+            @PathVariable("endTime") final String endTime) {
+        final Availability availability = new Availability(Timestamp.valueOf(startTime), Timestamp.valueOf(endTime));
+        // Subtract the availabilities and count the affected entities
+        long affectedCount = availabilityService.subtractAvailability(availability);
+        return new ResponseEntity<>(affectedCount, HttpStatus.OK);
+    }
+
     @GetMapping("list")
     public ResponseEntity<String> listAvailabilities() {
         final List<Availability> availabilities = availabilityService.findAll();
