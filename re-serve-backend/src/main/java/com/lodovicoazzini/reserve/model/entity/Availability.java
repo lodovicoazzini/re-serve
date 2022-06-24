@@ -3,6 +3,7 @@ package com.lodovicoazzini.reserve.model.entity;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 @Entity(name = "availability")
 @Table(name = "availability")
@@ -64,32 +65,21 @@ public class Availability implements TimeSlot {
 
     @Override
     public TimeSlot merge(TimeSlot other) {
-        // Find the slot starting first
-        final TimeSlot first;
-        final TimeSlot second;
-        if (this.compareTo(other) <= 0) {
-            first = this;
-            second = other;
-        } else {
-            first = other;
-            second = this;
-        }
-        // Verify the overlap
-        if (first.getEndTime().compareTo(second.getStartTime()) < 0) {
-            // No overlap -> return the original availability
-            return this;
-        } else {
-            // Overlap -> return the overlap
-            // Find the overall end time (the second might be included in the first)
-            final Timestamp endTime = first.getEndTime().compareTo(second.getEndTime()) > 0
-                    ? first.getEndTime()
-                    : second.getEndTime();
-            // Return the availability corresponding to the slot
-            return new Availability(
-                    first.getStartTime(),
-                    endTime
-            );
-        }
+        return this.combine(
+                other,
+                (original) -> original,
+                (first, second) -> {
+                    // Find the overall end time (the second might be included in the first)
+                    final Timestamp endTime = first.getEndTime().compareTo(second.getEndTime()) > 0
+                            ? first.getEndTime()
+                            : second.getEndTime();
+                    // Return the availability corresponding to the slot
+                    return new Availability(
+                            first.getStartTime(),
+                            endTime
+                    );
+                }
+        );
     }
 
     @Override
@@ -100,8 +90,8 @@ public class Availability implements TimeSlot {
                 .reduce(
                 new Availability(this.startTime, this.endTime),
                 (acc, other) -> {
-                    final TimeSlot overlap = acc.merge(other);
-                    return new Availability(overlap.getStartTime(), overlap.getEndTime());
+                    final TimeSlot merged = acc.merge(other);
+                    return new Availability(merged.getStartTime(), merged.getEndTime());
                 }
         );
         // Return the availability corresponding to the slot
@@ -110,11 +100,31 @@ public class Availability implements TimeSlot {
 
     @Override
     public TimeSlot getOverlap(TimeSlot other) {
-        return null;
+        return this.combine(
+                other,
+                (original) -> null,
+                (first, second) -> {
+                    // Find the sooner end time (the second might be included in the first)
+                    final Timestamp endTime = first.getEndTime().compareTo(second.getEndTime()) > 0
+                            ? second.getEndTime()
+                            : first.getEndTime();
+                    // Return the availability corresponding to the slot
+                    return new Availability(
+                            second.getStartTime(),
+                            endTime
+                    );
+                }
+        );
     }
 
     @Override
     public TimeSlot getOverlap(List<TimeSlot> others) {
-        return null;
+        // Combine the overlapping slots
+        final Optional<TimeSlot> overlapSlot = others.stream()
+                .sorted()
+                .filter(other -> this.getOverlap(other) != null)
+                .findFirst();
+        // Return the overlap if present, otherwise null
+        return overlapSlot.orElse(null);
     }
 }

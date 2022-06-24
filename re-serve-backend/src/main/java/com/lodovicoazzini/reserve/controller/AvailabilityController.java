@@ -1,5 +1,7 @@
 package com.lodovicoazzini.reserve.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.service.AvailabilityService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,7 @@ public class AvailabilityController {
     private final AvailabilityService availabilityService;
 
     @GetMapping("create/{startTime}/{endTime}")
-    public ResponseEntity<HttpStatus> createAvailability(
+    public ResponseEntity<String> createAvailability(
             @PathVariable("startTime") final String startTime,
             @PathVariable("endTime") final String endTime
     ) {
@@ -27,6 +29,12 @@ public class AvailabilityController {
                 Timestamp.valueOf(startTime),
                 Timestamp.valueOf(endTime)
         ));
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        final ObjectMapper mapper = new ObjectMapper();
+        try {
+            final String encoded = mapper.writeValueAsString(saved);
+            return new ResponseEntity<>(encoded, HttpStatus.CREATED);
+        } catch (JsonProcessingException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }
