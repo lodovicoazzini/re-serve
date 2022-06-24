@@ -3,6 +3,8 @@ package com.lodovicoazzini.reserve.model.service;
 import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.repository.AvailabilityRepository;
 import lombok.RequiredArgsConstructor;
+import org.postgresql.util.PSQLException;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,7 +16,7 @@ public class AvailabilityService {
 
     private final AvailabilityRepository availabilityRepository;
 
-    public Availability saveAvailability(final Availability availability) {
+    public Availability saveAvailability(final Availability availability) throws PSQLException {
         // Get the list of the existing availabilities
         List<Availability> availabilities = availabilityRepository.findAll();
         final Availability merged = availability.merge(
@@ -38,5 +40,9 @@ public class AvailabilityService {
 
     public List<Availability> findAll() {
         return availabilityRepository.findAll();
+    }
+
+    public List<Availability> findLike(final Availability availability) {
+        return availabilityRepository.findAll(Example.of(availability));
     }
 }
