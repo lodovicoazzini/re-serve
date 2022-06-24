@@ -4,7 +4,10 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity(name = "availability")
-@Table(name = "availability")
+@Table(
+        name = "availability",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "availability_slot_unique", columnNames = {"start_time", "end_time"})})
 public class Availability implements TimeSlot {
 
     @Id

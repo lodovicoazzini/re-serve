@@ -16,14 +16,20 @@ public class AvailabilityService {
 
     public Availability saveAvailability(final Availability availability) {
         // Get the list of the existing availabilities
-        List<Availability> availabilities = availabilityRepository.findAll().stream()
-                .map(a -> new Availability(a.getStartTime(), a.getEndTime()))
-                .collect(Collectors.toList());
+        List<Availability> availabilities = availabilityRepository.findAll();
         final Availability merged = availability.merge(
                 availabilities,
                 Availability::new
         );
-        return new Availability(merged.getStartTime(), merged.getEndTime());
+        // Remove the previous availabilities
+        availabilities.stream()
+                .filter(other -> availability.getOverlap(other, Availability::new).isPresent())
+                .forEach(entity -> {
+                    System.out.println(entity);
+                    availabilityRepository.delete(entity);
+                });
+        // Save the merged availability
+        return availabilityRepository.save(merged);
     }
 
     public void deleteAvailability(final Availability availability) {

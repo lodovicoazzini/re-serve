@@ -1,7 +1,11 @@
 package com.lodovicoazzini.reserve.model.entity;
 
+import org.mockito.internal.verification.Times;
+
+import javax.swing.text.html.Option;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -52,17 +56,16 @@ public interface TimeSlot extends Comparable<TimeSlot> {
 
     default <T extends TimeSlot> T merge(final List<T> others, final BiFunction<Timestamp, Timestamp, T> generator) {
         // Combine the slots
-        final TimeSlot merged = others.stream()
+        return others.stream()
                 .sorted()
                 .reduce(
                         generator.apply(this.getStartTime(), this.getEndTime()),
                         (acc, other) -> acc.merge(other, generator)
                 );
-        return generator.apply(merged.getStartTime(), merged.getEndTime());
     }
 
-    default TimeSlot getOverlap(final TimeSlot other, final BiFunction<Timestamp, Timestamp, TimeSlot> generator) {
-        return this.combine(
+    default <T extends TimeSlot> Optional<T> getOverlap(final T other, final BiFunction<Timestamp, Timestamp, T> generator) {
+        final Optional<TimeSlot> overlap = Optional.ofNullable(this.combine(
                 other,
                 (original) -> null,
                 (first, second) -> {
@@ -73,15 +76,20 @@ public interface TimeSlot extends Comparable<TimeSlot> {
                     // Return the slot
                     return generator.apply(second.getStartTime(), endTime);
                 }
-        );
+        ));
+        if (overlap.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(generator.apply(overlap.get().getStartTime(), overlap.get().getEndTime()));
+        }
     }
 
-    default TimeSlot getOverlap(final List<TimeSlot> others, final BiFunction<Timestamp, Timestamp, TimeSlot> generator) {
+    default <T extends TimeSlot> Optional<T> getOverlap(final List<T> others, final BiFunction<Timestamp, Timestamp, T> generator) {
         // Find the overlap, otherwise null
         return others.stream()
                 .sorted()
-                .filter(other -> this.getOverlap(other, generator) != null)
-                .findFirst().orElse(null);
+                .filter(other -> this.getOverlap(other, generator).isPresent())
+                .findFirst();
     }
 
     @Override
