@@ -23,8 +23,7 @@ public class AvailabilityController {
             @PathVariable("startTime") final String startTime,
             @PathVariable("endTime") final String endTime
     ) {
-        System.out.printf("start: %s end: %s%n", startTime, endTime);
-        final Availability availability = availabilityService.saveAvailability(new Availability(
+        final Availability saved = availabilityService.saveAvailability(new Availability(
                 Timestamp.valueOf(startTime),
                 Timestamp.valueOf(endTime)
         ));

@@ -2,10 +2,11 @@ package com.lodovicoazzini.reserve.model.entity;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Entity(name = "availability")
 @Table(name = "availability")
-public class Availability {
+public class Availability implements TimeSlot {
 
     @Id
     @SequenceGenerator(name = "availability_sequence", sequenceName = "availability_sequence", allocationSize = 1)
@@ -54,5 +55,66 @@ public class Availability {
     @Override
     public String toString() {
         return "Availability{start=%s, end=%s}".formatted(startTime, endTime);
+    }
+
+    @Override
+    public int compareTo(TimeSlot other) {
+        return this.startTime.compareTo(other.getStartTime());
+    }
+
+    @Override
+    public TimeSlot merge(TimeSlot other) {
+        // Find the slot starting first
+        final TimeSlot first;
+        final TimeSlot second;
+        if (this.compareTo(other) <= 0) {
+            first = this;
+            second = other;
+        } else {
+            first = other;
+            second = this;
+        }
+        // Verify the overlap
+        if (first.getEndTime().compareTo(second.getStartTime()) < 0) {
+            // No overlap -> return the original availability
+            return this;
+        } else {
+            // Overlap -> return the overlap
+            // Find the overall end time (the second might be included in the first)
+            final Timestamp endTime = first.getEndTime().compareTo(second.getEndTime()) > 0
+                    ? first.getEndTime()
+                    : second.getEndTime();
+            // Return the availability corresponding to the slot
+            return new Availability(
+                    first.getStartTime(),
+                    endTime
+            );
+        }
+    }
+
+    @Override
+    public Availability merge(final List<TimeSlot> others) {
+        // Combine the overlapping slots
+        final TimeSlot mergedSlot = others.stream()
+                .sorted()
+                .reduce(
+                new Availability(this.startTime, this.endTime),
+                (acc, other) -> {
+                    final TimeSlot overlap = acc.merge(other);
+                    return new Availability(overlap.getStartTime(), overlap.getEndTime());
+                }
+        );
+        // Return the availability corresponding to the slot
+        return new Availability(mergedSlot.getStartTime(), mergedSlot.getEndTime());
+    }
+
+    @Override
+    public TimeSlot getOverlap(TimeSlot other) {
+        return null;
+    }
+
+    @Override
+    public TimeSlot getOverlap(List<TimeSlot> others) {
+        return null;
     }
 }
