@@ -26,7 +26,14 @@ public class AvailabilityController {
     public ResponseEntity<String> createAvailability(
             @PathVariable("startTime") final String startTime,
             @PathVariable("endTime") final String endTime) {
-        final Availability availability = new Availability(Timestamp.valueOf(startTime), Timestamp.valueOf(endTime));
+        final Availability availability;
+        try {
+            availability = new Availability(
+                    Timestamp.valueOf(startTime),
+                    Timestamp.valueOf(endTime));
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         try {
             final Availability saved = availabilityService.saveAvailability(availability);
             if (availability.equals(saved)) {

@@ -1,6 +1,9 @@
 package com.lodovicoazzini.reserve.model.entity;
 
+import lombok.SneakyThrows;
+
 import javax.persistence.*;
+import java.security.InvalidParameterException;
 import java.sql.Timestamp;
 
 @Entity(name = "availability")
@@ -25,7 +28,10 @@ public class Availability implements TimeSlot {
     public Availability() {
     }
 
-    public Availability(Timestamp start, Timestamp end) {
+    public Availability(Timestamp start, Timestamp end) throws IllegalArgumentException {
+        if (end.compareTo(start) <= 0) {
+            throw new IllegalArgumentException("The time interval must have a positive duration");
+        }
         this.startTime = start;
         this.endTime = end;
     }
