@@ -15,30 +15,15 @@ public class AvailabilityService {
     private final AvailabilityRepository availabilityRepository;
 
     public Availability saveAvailability(final Availability availability) {
-        final Availability savedAvailability;
         // Get the list of the existing availabilities
-        List<Availability> overlapping = availabilityRepository.findAll().stream()
-                .filter(other -> availability.merge(other) != null)
+        List<Availability> availabilities = availabilityRepository.findAll().stream()
+                .map(a -> new Availability(a.getStartTime(), a.getEndTime()))
                 .collect(Collectors.toList());
-        if (overlapping.isEmpty()) {
-            // No overlap -> save the availability
-            savedAvailability = availabilityRepository.save(availability);
-        } else {
-            // Overlap -> merge the availabilities
-            // Remove all the old availabilities
-            availabilityRepository.deleteAll(overlapping);
-            // Add the availability to the list of overlapping
-            overlapping.add(availability);
-            // Sort the availabilities and find the overall start and end time
-            overlapping = overlapping.stream().sorted().collect(Collectors.toList());
-            final Availability overlap = new Availability(
-                    overlapping.get(0).getStartTime(),
-                    overlapping.get(overlapping.size() - 1).getEndTime()
-            );
-            // Save the overlap
-            savedAvailability = availabilityRepository.save(overlap);
-        }
-        return savedAvailability;
+        final Availability merged = availability.merge(
+                availabilities,
+                Availability::new
+        );
+        return new Availability(merged.getStartTime(), merged.getEndTime());
     }
 
     public void deleteAvailability(final Availability availability) {

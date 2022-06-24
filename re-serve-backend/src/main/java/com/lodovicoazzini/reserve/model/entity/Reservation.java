@@ -2,7 +2,6 @@ package com.lodovicoazzini.reserve.model.entity;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.List;
 
 @Entity(name = "reservation")
 @Table(name = "reservation")
@@ -79,30 +78,5 @@ public class Reservation implements TimeSlot {
     @Override
     public String toString() {
         return "Reservation{start=%s, end=%s, title='%s', email='%s'}".formatted(startTime, endTime, title, email);
-    }
-
-    @Override
-    public TimeSlot merge(TimeSlot other) {
-        return null;
-    }
-
-    @Override
-    public TimeSlot merge(List<TimeSlot> others) {
-        return null;
-    }
-
-    @Override
-    public TimeSlot getOverlap(TimeSlot other) {
-        return null;
-    }
-
-    @Override
-    public TimeSlot getOverlap(List<TimeSlot> others) {
-        return null;
-    }
-
-    @Override
-    public int compareTo(TimeSlot other) {
-        return this.startTime.compareTo(other.getStartTime());
     }
 }
