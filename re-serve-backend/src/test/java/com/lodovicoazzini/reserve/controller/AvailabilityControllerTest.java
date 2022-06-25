@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.lodovicoazzini.reserve.utils.ControllerUtils.encodeResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -50,7 +51,7 @@ class AvailabilityControllerTest {
         final String endTime = "2022-06-25 11:00:00";
         when(this.availabilityService.saveAvailability(any(Availability.class))).thenReturn(mockAvailability);
         final ResponseEntity<String> response = this.availabilityController.createAvailability(startTime, endTime);
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(encodeResponse(mockAvailability, HttpStatus.CREATED), response);
     }
 
     @Test
@@ -117,8 +118,7 @@ class AvailabilityControllerTest {
                 "2022-06-25 09:00:00",
                 "2022-06-25 11:00:00"
         );
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(1, response.getBody());
+        assertEquals(new ResponseEntity<>(1, HttpStatus.OK), response);
     }
 
     @Test
@@ -128,7 +128,30 @@ class AvailabilityControllerTest {
                 "2022-06-25 09:00:00",
                 "2022-06-25 11:00:00"
         );
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(0, response.getBody());
+        assertEquals(new ResponseEntity<>(0, HttpStatus.OK), response);
+    }
+
+    @Test
+    void testSubtractAvailability() {
+        when(availabilityService.subtractAvailability(any(Availability.class))).thenReturn(1);
+        final ResponseEntity<Integer> response = availabilityController.subtractAvailability(
+                "2022-06-25 09:00:00",
+                "2022-06-25 10:00:00"
+        );
+        assertEquals(new ResponseEntity<>(1, HttpStatus.OK), response);
+    }
+
+    @Test
+    void testListAvailabilities() {
+        when(availabilityService.listAvailabilities()).thenReturn(List.of(mockAvailability));
+        final ResponseEntity<String> response = availabilityController.listAvailabilities();
+        assertEquals(encodeResponse(List.of(mockAvailability), HttpStatus.OK), response);
+    }
+
+    @Test
+    void testListAvailabilitiesEmpty() {
+        when(availabilityService.listAvailabilities()).thenReturn(new ArrayList<>());
+        final ResponseEntity<String> response = availabilityController.listAvailabilities();
+        assertEquals(encodeResponse(new ArrayList<>(), HttpStatus.OK), response);
     }
 }
