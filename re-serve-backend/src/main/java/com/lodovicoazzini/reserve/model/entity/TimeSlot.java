@@ -1,5 +1,7 @@
 package com.lodovicoazzini.reserve.model.entity;
 
+import com.lodovicoazzini.reserve.enums.OverlapType;
+
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -12,10 +14,11 @@ public interface TimeSlot extends Comparable<TimeSlot> {
 
     Timestamp getEndTime();
 
-    default TimeSlot combine(
+    private TimeSlot combine(
             final TimeSlot other,
-            final Function<TimeSlot, TimeSlot> failureCallback,
-            final BiFunction<TimeSlot, TimeSlot, TimeSlot> successCallback) {
+            final Function<TimeSlot, TimeSlot> noOverlapCallback,
+            final BiFunction<TimeSlot, TimeSlot, TimeSlot> overlapCallback,
+            final BiFunction<TimeSlot, TimeSlot, TimeSlot> edgeCallback) {
         // Find the slot starting first
         final TimeSlot first;
         final TimeSlot second;
@@ -29,24 +32,50 @@ public interface TimeSlot extends Comparable<TimeSlot> {
         // Verify the overlap
         if (first.getEndTime().compareTo(second.getStartTime()) < 0) {
             // No overlap
-            return failureCallback.apply(this);
+            return noOverlapCallback.apply(this);
+        } else if (first.getEndTime().compareTo(second.getStartTime()) == 0) {
+            // Edge overlap
+            return edgeCallback.apply(first, second);
         } else {
-            return successCallback.apply(first, second);
+            // Overlap
+            return overlapCallback.apply(first, second);
         }
     }
 
+    default <T extends TimeSlot> OverlapType getOverlapType(final T other) {
+        final OverlapType[] result = new OverlapType[1];
+        this.combine(
+                other,
+                (original) -> {
+                    result[0] = OverlapType.DISTINCT;
+                    return null;
+                },
+                (first, second) -> {
+                    result[0] = OverlapType.OVERLAP;
+                    return null;
+                },
+                (first, second) -> {
+                    result[0] = OverlapType.EDGE;
+                    return null;
+                }
+        );
+        return result[0];
+    }
+
     default <T extends TimeSlot> T merge(final T other, final BiFunction<Timestamp, Timestamp, T> generator) {
+        final BiFunction<TimeSlot, TimeSlot, TimeSlot> mergeLogic = (first, second) -> {
+            // Find the overall end time (the second might be included in the first)
+            final Timestamp endTime = first.getEndTime().compareTo(second.getEndTime()) > 0
+                    ? first.getEndTime()
+                    : second.getEndTime();
+            // Return the slot
+            return generator.apply(first.getStartTime(), endTime);
+        };
         final TimeSlot merged = this.combine(
                 other,
                 (original) -> original,
-                (first, second) -> {
-                    // Find the overall end time (the second might be included in the first)
-                    final Timestamp endTime = first.getEndTime().compareTo(second.getEndTime()) > 0
-                            ? first.getEndTime()
-                            : second.getEndTime();
-                    // Return the slot
-                    return generator.apply(first.getStartTime(), endTime);
-                }
+                mergeLogic,
+                mergeLogic
         );
         return generator.apply(merged.getStartTime(), merged.getEndTime());
     }
@@ -74,7 +103,8 @@ public interface TimeSlot extends Comparable<TimeSlot> {
                             : first.getEndTime();
                     // Return the slot
                     return generator.apply(second.getStartTime(), endTime);
-                }
+                },
+                (first, second) -> null
         ));
         if (overlap.isEmpty()) {
             return Optional.empty();
@@ -115,7 +145,8 @@ public interface TimeSlot extends Comparable<TimeSlot> {
                             return generator.apply(first.getEndTime(), this.getEndTime());
                         }
                     }
-                }
+                },
+                (first, second) -> this
         ));
         if (subtracted.isEmpty()) {
             return Optional.empty();

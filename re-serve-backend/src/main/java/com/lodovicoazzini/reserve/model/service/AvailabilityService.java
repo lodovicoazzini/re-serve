@@ -1,5 +1,6 @@
 package com.lodovicoazzini.reserve.model.service;
 
+import com.lodovicoazzini.reserve.enums.OverlapType;
 import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.repository.AvailabilityRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class AvailabilityService {
         );
         // Remove the previous availabilities
         availabilities.stream()
-                .filter(other -> availability.getOverlap(other, Availability::new).isPresent())
+                .filter(other -> merged.getOverlapType(other) != OverlapType.DISTINCT)
                 .forEach(availabilityRepository::delete);
         // Save the merged availability
         return availabilityRepository.save(merged);
@@ -39,7 +40,7 @@ public class AvailabilityService {
     public long subtractAvailability(final Availability availability) {
         // Get the list of the existing availabilities that overlap the given one
         final List<Availability> availabilities = availabilityRepository.findAll().stream()
-                .filter(saved -> saved.getOverlap(availability, Availability::new).isPresent())
+                .filter(saved -> saved.getOverlapType(availability) != OverlapType.DISTINCT)
                 .collect(Collectors.toList());
         // Subtract the availability from the list and update the persisted value
         availabilities.forEach(saved -> {

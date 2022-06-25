@@ -1,5 +1,6 @@
 package com.lodovicoazzini.reserve.model.service;
 
+import com.lodovicoazzini.reserve.enums.OverlapType;
 import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.entity.Reservation;
 import com.lodovicoazzini.reserve.model.repository.ReservationRepository;
@@ -23,7 +24,7 @@ public class ReservationService {
         // Verify that the reservation is included in an available slot
         final List<Availability> availabilities = availabilityService.listAvailabilities();
         final Optional<Availability> match = availabilities.stream()
-                .filter(availability -> availability.getOverlap(reservation, Availability::new).isPresent())
+                .filter(availability -> availability.getOverlapType(reservation) != OverlapType.DISTINCT)
                 .findFirst();
         if (match.isPresent()) {
             // Included -> save the reservation and update the available slot

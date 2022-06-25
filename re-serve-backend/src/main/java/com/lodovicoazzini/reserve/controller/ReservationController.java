@@ -48,10 +48,10 @@ public class ReservationController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             } else if (reservation.equals(saved.get())) {
                 // No merge
-                return encodeResponse(saved, HttpStatus.CREATED);
+                return encodeResponse(saved.get(), HttpStatus.CREATED);
             } else {
                 // Merge
-                return encodeResponse(saved, HttpStatus.OK);
+                return encodeResponse(saved.get(), HttpStatus.OK);
             }
         } catch (PSQLException e) {
             // Duplicate
