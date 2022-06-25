@@ -15,9 +15,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -104,5 +107,28 @@ class AvailabilityControllerTest {
                 endTime
         );
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void testRemoveAvailabilityExisting() {
+        when(availabilityService.findAvailabilitiesLike(any(Availability.class))).thenReturn(List.of(mockAvailability));
+        doNothing().when(availabilityService).deleteAvailability(any(Availability.class));
+        final ResponseEntity<Integer> response = availabilityController.removeAvailability(
+                "2022-06-25 09:00:00",
+                "2022-06-25 11:00:00"
+        );
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody());
+    }
+
+    @Test
+    void testRemoveAvailabilityNonExisting() {
+        when(availabilityService.findAvailabilitiesLike(any(Availability.class))).thenReturn(new ArrayList<>());
+        final ResponseEntity<Integer> response = availabilityController.removeAvailability(
+                "2022-06-25 09:00:00",
+                "2022-06-25 11:00:00"
+        );
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(0, response.getBody());
     }
 }
