@@ -5,7 +5,6 @@ import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.entity.Reservation;
 import com.lodovicoazzini.reserve.model.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
-import org.postgresql.util.PSQLException;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final AvailabilityService availabilityService;
 
-    public Optional<Reservation> saveReservation(final Reservation reservation) throws PSQLException {
+    public Optional<Reservation> saveReservation(final Reservation reservation) {
         final Optional<Reservation> saved;
         // Verify that the reservation is included in an available slot
         final List<Availability> availabilities = availabilityService.listAvailabilities();
@@ -31,10 +30,8 @@ public class ReservationService {
             saved = Optional.of(reservationRepository.save(reservation));
             availabilityService.deleteAvailability(match.get());
             final Optional<Availability> updated = match.get().subtract(reservation, Availability::new);
-            if (updated.isPresent()) {
-                // Not fully consumed -> save
-                availabilityService.saveAvailability(updated.get());
-            }
+            // Not fully consumed -> save
+            updated.ifPresent(availabilityService::saveAvailability);
         } else {
             // Not included -> return empty
             saved = Optional.empty();
@@ -42,7 +39,7 @@ public class ReservationService {
         return saved;
     }
 
-    public Availability deleteReservation(final Reservation reservation) throws PSQLException {
+    public Availability deleteReservation(final Reservation reservation) {
         // Delete the reservation
         reservationRepository.delete(reservation);
         // Restore the reserved slot as an availability

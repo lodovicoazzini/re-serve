@@ -3,7 +3,6 @@ package com.lodovicoazzini.reserve.controller;
 import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.service.AvailabilityService;
 import lombok.RequiredArgsConstructor;
-import org.postgresql.util.PSQLException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,18 +32,13 @@ public class AvailabilityController {
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        try {
-            final Availability saved = availabilityService.saveAvailability(availability);
-            if (availability.equals(saved)) {
-                // No merge
-                return encodeResponse(saved, HttpStatus.CREATED);
-            } else {
-                // Merge
-                return encodeResponse(saved, HttpStatus.OK);
-            }
-        } catch (PSQLException e) {
-            // Duplicate
-            return encodeResponse(availability, HttpStatus.CONTINUE);
+        final Availability saved = availabilityService.saveAvailability(availability);
+        if (availability.equals(saved)) {
+            // No merge
+            return encodeResponse(saved, HttpStatus.CREATED);
+        } else {
+            // Merge
+            return encodeResponse(saved, HttpStatus.OK);
         }
     }
 
@@ -59,12 +53,12 @@ public class AvailabilityController {
     }
 
     @GetMapping("subtract/{startTime}/{endTime}")
-    public ResponseEntity<Long> subtractAvailability(
+    public ResponseEntity<Integer> subtractAvailability(
             @PathVariable("startTime") final String startTime,
             @PathVariable("endTime") final String endTime) {
         final Availability availability = new Availability(Timestamp.valueOf(startTime), Timestamp.valueOf(endTime));
         // Subtract the availabilities and count the affected entities
-        long affectedCount = availabilityService.subtractAvailability(availability);
+        int affectedCount = availabilityService.subtractAvailability(availability);
         return new ResponseEntity<>(affectedCount, HttpStatus.OK);
     }
 

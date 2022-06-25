@@ -4,7 +4,6 @@ import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.entity.Reservation;
 import com.lodovicoazzini.reserve.model.service.ReservationService;
 import lombok.RequiredArgsConstructor;
-import org.postgresql.util.PSQLException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,21 +40,16 @@ public class ReservationController {
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        try {
-            final Optional<Reservation> saved = reservationService.saveReservation(reservation);
-            if (saved.isEmpty()) {
-                // No available slot -> notify frontend
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            } else if (reservation.equals(saved.get())) {
-                // No merge
-                return encodeResponse(saved.get(), HttpStatus.CREATED);
-            } else {
-                // Merge
-                return encodeResponse(saved.get(), HttpStatus.OK);
-            }
-        } catch (PSQLException e) {
-            // Duplicate
-            return encodeResponse(reservation, HttpStatus.CONTINUE);
+        final Optional<Reservation> saved = reservationService.saveReservation(reservation);
+        if (saved.isEmpty()) {
+            // No available slot -> notify frontend
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else if (reservation.equals(saved.get())) {
+            // No merge
+            return encodeResponse(saved.get(), HttpStatus.CREATED);
+        } else {
+            // Merge
+            return encodeResponse(saved.get(), HttpStatus.OK);
         }
     }
 
@@ -74,20 +68,14 @@ public class ReservationController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         // Find a reservation that matches the provided one
-        // TODO: How to match with null fields ignored
         final Optional<Reservation> match = reservationService.findReservationsLike(reservation).stream().findFirst();
         if (match.isEmpty()) {
             // No matching reservation -> notify frontend
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
             // Found matching reservation -> delete the reservation and update the availabilities
-            try {
-                final Availability restored = reservationService.deleteReservation(match.get());
-                return encodeResponse(restored, HttpStatus.OK);
-            } catch (PSQLException e) {
-                // Availability already present -> notify frontend
-                return new ResponseEntity<>(HttpStatus.CONTINUE);
-            }
+            final Availability restored = reservationService.deleteReservation(match.get());
+            return encodeResponse(restored, HttpStatus.OK);
         }
     }
 

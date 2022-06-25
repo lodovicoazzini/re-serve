@@ -4,7 +4,6 @@ import com.lodovicoazzini.reserve.enums.OverlapType;
 import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.repository.AvailabilityRepository;
 import lombok.RequiredArgsConstructor;
-import org.postgresql.util.PSQLException;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,7 @@ public class AvailabilityService {
 
     private final AvailabilityRepository availabilityRepository;
 
-    public Availability saveAvailability(final Availability availability) throws PSQLException {
+    public Availability saveAvailability(final Availability availability) {
         // Get the list of the existing availabilities
         final List<Availability> availabilities = availabilityRepository.findAll();
         final Availability merged = availability.merge(
@@ -37,7 +36,7 @@ public class AvailabilityService {
         availabilityRepository.delete(availability);
     }
 
-    public long subtractAvailability(final Availability availability) {
+    public int subtractAvailability(final Availability availability) {
         // Get the list of the existing availabilities that overlap the given one
         final List<Availability> availabilities = availabilityRepository.findAll().stream()
                 .filter(saved -> saved.getOverlapType(availability) != OverlapType.DISTINCT)

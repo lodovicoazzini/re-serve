@@ -2,6 +2,7 @@ package com.lodovicoazzini.reserve.model.entity;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Entity(name = "reservation")
 @Table(
@@ -84,5 +85,18 @@ public class Reservation implements TimeSlot {
     @Override
     public String toString() {
         return "Reservation{start=%s, end=%s, title='%s', email='%s'}".formatted(startTime, endTime, title, email);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reservation that = (Reservation) o;
+        return startTime.equals(that.startTime) && endTime.equals(that.endTime) && title.equals(that.title) && email.equals(that.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(startTime, endTime, title, email);
     }
 }
