@@ -54,11 +54,11 @@ public class AvailabilityService {
         return availabilities.size();
     }
 
-    public List<Availability> findAll() {
+    public List<Availability> listAvailabilities() {
         return availabilityRepository.findAll();
     }
 
-    public List<Availability> findLike(final Availability availability) {
+    public List<Availability> findAvailabilitiesLike(final Availability availability) {
         return availabilityRepository.findAll(Example.of(availability));
     }
 }

@@ -5,6 +5,7 @@ import com.lodovicoazzini.reserve.model.entity.Reservation;
 import com.lodovicoazzini.reserve.model.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.postgresql.util.PSQLException;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class ReservationService {
     public Optional<Reservation> saveReservation(final Reservation reservation) throws PSQLException {
         final Optional<Reservation> saved;
         // Verify that the reservation is included in an available slot
-        final List<Availability> availabilities = availabilityService.findAll();
+        final List<Availability> availabilities = availabilityService.listAvailabilities();
         final Optional<Availability> match = availabilities.stream()
                 .filter(availability -> availability.getOverlap(reservation, Availability::new).isPresent())
                 .findFirst();
@@ -38,5 +39,21 @@ public class ReservationService {
             saved = Optional.empty();
         }
         return saved;
+    }
+
+    private Availability deleteReservation(final Reservation reservation) throws PSQLException {
+        // Delete the reservation
+        reservationRepository.delete(reservation);
+        // Restore the reserved slot as an availability
+        final Availability restored = new Availability(reservation.getStartTime(), reservation.getEndTime());
+        return availabilityService.saveAvailability(restored);
+    }
+
+    private List<Reservation> listReservations() {
+        return reservationRepository.findAll();
+    }
+
+    private List<Reservation> findReservationsLike(final Reservation reservation) {
+        return reservationRepository.findAll(Example.of(reservation));
     }
 }

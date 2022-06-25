@@ -1,7 +1,5 @@
 package com.lodovicoazzini.reserve.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.service.AvailabilityService;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.sql.Timestamp;
 import java.util.List;
 
+import static com.lodovicoazzini.reserve.utils.ControllerUtils.encodeResponse;
+
 @RestController
 @RequestMapping("/reserve/availability")
 @RequiredArgsConstructor
 public class AvailabilityController {
+
     private final AvailabilityService availabilityService;
 
     @GetMapping("create/{startTime}/{endTime}")
@@ -28,9 +29,7 @@ public class AvailabilityController {
             @PathVariable("endTime") final String endTime) {
         final Availability availability;
         try {
-            availability = new Availability(
-                    Timestamp.valueOf(startTime),
-                    Timestamp.valueOf(endTime));
+            availability = new Availability(Timestamp.valueOf(startTime), Timestamp.valueOf(endTime));
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -54,7 +53,7 @@ public class AvailabilityController {
             @PathVariable("startTime") final String startTime,
             @PathVariable("endTime") final String endTime) {
         final Availability availability = new Availability(Timestamp.valueOf(startTime), Timestamp.valueOf(endTime));
-        final List<Availability> similar = availabilityService.findLike(availability);
+        final List<Availability> similar = availabilityService.findAvailabilitiesLike(availability);
         similar.forEach(availabilityService::deleteAvailability);
         return new ResponseEntity<>(similar.size(), HttpStatus.OK);
     }
@@ -71,17 +70,7 @@ public class AvailabilityController {
 
     @GetMapping("list")
     public ResponseEntity<String> listAvailabilities() {
-        final List<Availability> availabilities = availabilityService.findAll();
+        final List<Availability> availabilities = availabilityService.listAvailabilities();
         return encodeResponse(availabilities, HttpStatus.OK);
-    }
-
-    private ResponseEntity<String> encodeResponse(final Object content, final HttpStatus successStatus) {
-        final ObjectMapper mapper = new ObjectMapper();
-        try {
-            final String encoded = mapper.writeValueAsString(content);
-            return new ResponseEntity<>(encoded, successStatus);
-        } catch (JsonProcessingException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
     }
 }
