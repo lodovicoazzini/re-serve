@@ -26,12 +26,19 @@ public class Availability implements TimeSlot {
     public Availability() {
     }
 
-    public Availability(Timestamp start, Timestamp end) throws IllegalArgumentException {
-        if (end.compareTo(start) <= 0) {
+    /**
+     * Availability constructor
+     *
+     * @param startTime The start time of the availability slot
+     * @param endTime   The end time of the availability slot
+     * @throws IllegalArgumentException If the slot duration is not positive
+     */
+    public Availability(Timestamp startTime, Timestamp endTime) throws IllegalArgumentException {
+        if (endTime.compareTo(startTime) <= 0) {
             throw new IllegalArgumentException("The time interval must have a positive duration");
         }
-        this.startTime = start;
-        this.endTime = end;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
     public Long getId() {
@@ -46,16 +53,22 @@ public class Availability implements TimeSlot {
         return startTime;
     }
 
-    public void setStartTime(Timestamp start) {
-        this.startTime = start;
+    public void setStartTime(Timestamp startTime) throws IllegalArgumentException {
+        if (this.endTime != null && startTime.compareTo(this.endTime) >= 0) {
+            throw new IllegalArgumentException("The time interval must have a positive duration");
+        }
+        this.startTime = startTime;
     }
 
     public Timestamp getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Timestamp end) {
-        this.endTime = end;
+    public void setEndTime(Timestamp endTime) throws IllegalArgumentException {
+        if (this.startTime != null && endTime.compareTo(this.startTime) <= 0) {
+            throw new IllegalArgumentException("The time interval must have a positive duration");
+        }
+        this.endTime = endTime;
     }
 
     @Override
