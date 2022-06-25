@@ -1,5 +1,6 @@
 package com.lodovicoazzini.reserve.controller;
 
+import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.entity.Reservation;
 import com.lodovicoazzini.reserve.model.service.ReservationService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 import static com.lodovicoazzini.reserve.utils.ControllerUtils.encodeResponse;
@@ -55,5 +57,43 @@ public class ReservationController {
             // Duplicate
             return encodeResponse(reservation, HttpStatus.CONTINUE);
         }
+    }
+
+    @GetMapping("remove/{startTime}/{endTime}/{email}")
+    public ResponseEntity<String> removeReservation(
+            @PathVariable("startTime") final String startTime,
+            @PathVariable("endTime") final String endTime,
+            @PathVariable("email") final String email) {
+        final Reservation reservation;
+        try {
+            reservation = new Reservation();
+            reservation.setStartTime(Timestamp.valueOf(startTime));
+            reservation.setEndTime(Timestamp.valueOf(endTime));
+            reservation.setEmail(email);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        // Find a reservation that matches the provided one
+        // TODO: How to match with null fields ignored
+        final Optional<Reservation> match = reservationService.findReservationsLike(reservation).stream().findFirst();
+        if (match.isEmpty()) {
+            // No matching reservation -> notify frontend
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else {
+            // Found matching reservation -> delete the reservation and update the availabilities
+            try {
+                final Availability restored = reservationService.deleteReservation(match.get());
+                return encodeResponse(restored, HttpStatus.OK);
+            } catch (PSQLException e) {
+                // Availability already present -> notify frontend
+                return new ResponseEntity<>(HttpStatus.CONTINUE);
+            }
+        }
+    }
+
+    @GetMapping("list")
+    public ResponseEntity<String> listReservations() {
+        final List<Reservation> reservations = reservationService.listReservations();
+        return encodeResponse(reservations, HttpStatus.OK);
     }
 }

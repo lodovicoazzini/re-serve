@@ -41,7 +41,7 @@ public class ReservationService {
         return saved;
     }
 
-    private Availability deleteReservation(final Reservation reservation) throws PSQLException {
+    public Availability deleteReservation(final Reservation reservation) throws PSQLException {
         // Delete the reservation
         reservationRepository.delete(reservation);
         // Restore the reserved slot as an availability
@@ -49,11 +49,11 @@ public class ReservationService {
         return availabilityService.saveAvailability(restored);
     }
 
-    private List<Reservation> listReservations() {
+    public List<Reservation> listReservations() {
         return reservationRepository.findAll();
     }
 
-    private List<Reservation> findReservationsLike(final Reservation reservation) {
+    public List<Reservation> findReservationsLike(final Reservation reservation) {
         return reservationRepository.findAll(Example.of(reservation));
     }
 }
