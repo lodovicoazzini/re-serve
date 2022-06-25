@@ -54,24 +54,24 @@ class AvailabilityControllerTest {
     void testCreateAvailabilityInvalidTimeString() {
         final String startTime = "2022-06-2509:00:00";
         final String endTime = "2022-06-25 11:00:00";
-        final ResponseEntity<String> responseEntity = availabilityController.createAvailability(startTime, endTime);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        final ResponseEntity<String> response = availabilityController.createAvailability(startTime, endTime);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
     void testCreateAvailabilityZeroDuration() {
         final String startTime = "2022-06-25 09:00:00";
         final String endTime = "2022-06-25 09:00:00";
-        final ResponseEntity<String> responseEntity = availabilityController.createAvailability(startTime, endTime);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        final ResponseEntity<String> response = availabilityController.createAvailability(startTime, endTime);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
     void testCreateAvailabilityNegativeDuration() {
         final String startTime = "2022-06-25 09:00:00";
         final String endTime = "2022-06-25 08:00:00";
-        final ResponseEntity<String> responseEntity = availabilityController.createAvailability(startTime, endTime);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        final ResponseEntity<String> response = availabilityController.createAvailability(startTime, endTime);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
@@ -83,11 +83,11 @@ class AvailabilityControllerTest {
                 Timestamp.valueOf("2022-06-25 11:00:00")
         );
         when(availabilityService.saveAvailability(any(Availability.class))).thenReturn(overlapping);
-        final ResponseEntity<String> responseEntity = availabilityController.createAvailability(
+        final ResponseEntity<String> response = availabilityController.createAvailability(
                 startTime,
                 endTime
         );
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
@@ -99,10 +99,10 @@ class AvailabilityControllerTest {
                 Timestamp.valueOf(endTime)
         );
         when(availabilityService.saveAvailability(any(Availability.class))).thenReturn(duplicate);
-        final ResponseEntity<String> responseEntity = availabilityController.createAvailability(
+        final ResponseEntity<String> response = availabilityController.createAvailability(
                 startTime,
                 endTime
         );
-        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,21 @@ public class ReservationService {
                 .filter(availability -> availability.getOverlapType(reservation) != OverlapType.DISTINCT)
                 .findFirst();
         if (match.isPresent()) {
-            // Included -> save the reservation and update the available slot
+            // Included -> merge the reservation with the ones with the same email and title
+            final List<Reservation> reservations = this.listReservations().stream()
+                    .filter(other -> other.getTitle().equals(reservation.getTitle())
+                            && other.getEmail().equals(reservation.getEmail()))
+                    .collect(Collectors.toList());
+            final Reservation merged = reservation.merge(
+                    reservation,
+                    reservation::cloneWithSlot
+            );
+            // Remove the previous reservations and update the availabilities
+            reservations.stream()
+                    .filter(other -> merged.getOverlapType(other) != OverlapType.DISTINCT)
+                    .forEach(this::deleteReservation);
             saved = Optional.of(reservationRepository.save(reservation));
+            // Update the availability
             availabilityService.deleteAvailability(match.get());
             final Optional<Availability> updated = match.get().subtract(reservation, Availability::new);
             // Not fully consumed -> save

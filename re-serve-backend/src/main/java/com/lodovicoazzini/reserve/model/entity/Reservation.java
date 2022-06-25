@@ -42,6 +42,10 @@ public class Reservation implements TimeSlot {
         this.email = email;
     }
 
+    public Reservation cloneWithSlot(final Timestamp startTime, final Timestamp endTime) {
+        return new Reservation(startTime, endTime, this.title, this.email);
+    }
+
     public Long getId() {
         return id;
     }

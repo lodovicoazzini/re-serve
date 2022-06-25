@@ -19,7 +19,7 @@ public class AvailabilityService {
 
     public Availability saveAvailability(final Availability availability) {
         // Get the list of the existing availabilities
-        final List<Availability> availabilities = availabilityRepository.findAll();
+        final List<Availability> availabilities = this.listAvailabilities();
         final Availability merged = availability.merge(
                 availabilities,
                 Availability::new
@@ -27,7 +27,7 @@ public class AvailabilityService {
         // Remove the previous availabilities
         availabilities.stream()
                 .filter(other -> merged.getOverlapType(other) != OverlapType.DISTINCT)
-                .forEach(availabilityRepository::delete);
+                .forEach(this::deleteAvailability);
         // Save the merged availability
         return availabilityRepository.save(merged);
     }
@@ -38,17 +38,17 @@ public class AvailabilityService {
 
     public int subtractAvailability(final Availability availability) {
         // Get the list of the existing availabilities that overlap the given one
-        final List<Availability> availabilities = availabilityRepository.findAll().stream()
+        final List<Availability> availabilities = this.listAvailabilities().stream()
                 .filter(saved -> saved.getOverlapType(availability) != OverlapType.DISTINCT)
                 .collect(Collectors.toList());
         // Subtract the availability from the list and update the persisted value
         availabilities.forEach(saved -> {
                     // Delete the saved availability
-                    availabilityRepository.delete(saved);
+                    this.deleteAvailability(saved);
                     // Subtract the availability
                     final Optional<Availability> subtracted = saved.subtract(availability, Availability::new);
                     // If the availability is not completely deleted -> save the remainder
-                    subtracted.ifPresent(availabilityRepository::save);
+                    subtracted.ifPresent(this::saveAvailability);
                 });
         // Return the number of affected availabilities
         return availabilities.size();
