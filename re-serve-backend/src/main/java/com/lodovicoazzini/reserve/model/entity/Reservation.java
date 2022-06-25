@@ -31,9 +31,12 @@ public class Reservation implements TimeSlot {
     public Reservation() {
     }
 
-    public Reservation(Timestamp start, Timestamp end, String title, String email) {
-        this.startTime = start;
-        this.endTime = end;
+    public Reservation(Timestamp startTime, Timestamp endTime, String title, String email) throws IllegalArgumentException {
+        if (endTime.compareTo(startTime) <= 0) {
+            throw new IllegalArgumentException("The time interval must have a positive duration");
+        }
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.title = title;
         this.email = email;
     }

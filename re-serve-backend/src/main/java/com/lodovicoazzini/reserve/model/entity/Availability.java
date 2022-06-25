@@ -1,9 +1,6 @@
 package com.lodovicoazzini.reserve.model.entity;
 
-import lombok.SneakyThrows;
-
 import javax.persistence.*;
-import java.security.InvalidParameterException;
 import java.sql.Timestamp;
 
 @Entity(name = "availability")

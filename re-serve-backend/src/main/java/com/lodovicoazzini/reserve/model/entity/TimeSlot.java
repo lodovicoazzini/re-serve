@@ -93,9 +93,9 @@ public interface TimeSlot extends Comparable<TimeSlot> {
                 .findFirst();
     }
 
-    default <T extends TimeSlot> Optional<T> subtract(
-            final T other,
-            final BiFunction<Timestamp, Timestamp, T> generator) {
+    default <Other extends TimeSlot, Result extends TimeSlot> Optional<Result> subtract(
+            final Other other,
+            final BiFunction<Timestamp, Timestamp, Result> generator) {
         final Optional<TimeSlot> subtracted = Optional.ofNullable(this.combine(
                 other,
                 (original) -> original,
