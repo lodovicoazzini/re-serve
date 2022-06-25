@@ -1,6 +1,5 @@
 package com.lodovicoazzini.reserve.controller;
 
-import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.entity.Reservation;
 import com.lodovicoazzini.reserve.model.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +17,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.sql.Timestamp;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 

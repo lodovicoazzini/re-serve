@@ -14,6 +14,13 @@ public interface TimeSlot extends Comparable<TimeSlot> {
 
     Timestamp getEndTime();
 
+    /**
+     * @param other             The slot to combine with
+     * @param noOverlapCallback The method to build the new slot in case of no overlap
+     * @param overlapCallback   The method to build the new slot in case of overlap
+     * @param edgeCallback      The method to build the new slot in case of subsequent slots
+     * @return A new slot combining the two
+     */
     private TimeSlot combine(
             final TimeSlot other,
             final Function<TimeSlot, TimeSlot> noOverlapCallback,
@@ -42,7 +49,18 @@ public interface TimeSlot extends Comparable<TimeSlot> {
         }
     }
 
-    default <T extends TimeSlot> OverlapType getOverlapType(final T other) {
+    /**
+     * Get the type of overlap with another slot
+     * The type of overlap is
+     * DISTINCT if the two slots have no common span
+     * OVERLAP if the two slots have some span in common
+     * EDGE if the two slots touch each other
+     *
+     * @param other      The other slot
+     * @param <SlotType> The type of the other slot, must extend TimeSlot
+     * @return The OverlapType enumeration value corresponding to the type of overlap
+     */
+    default <SlotType extends TimeSlot> OverlapType getOverlapType(final SlotType other) {
         final OverlapType[] result = new OverlapType[1];
         this.combine(
                 other,
@@ -62,7 +80,20 @@ public interface TimeSlot extends Comparable<TimeSlot> {
         return result[0];
     }
 
-    default <T extends TimeSlot> T merge(final T other, final BiFunction<Timestamp, Timestamp, T> generator) {
+    /**
+     * Merge with another slot
+     * Two slots are merged also if they touch each other
+     * If the two slots don't overlap, the original slot is returned
+     *
+     * @param other      The other slot to merge with
+     * @param generator  The method to generate the merged slot
+     * @param <SlotType> The type of the slots being merged, must extend TimeSlot
+     * @return The merged time slot
+     */
+    default <SlotType extends TimeSlot> SlotType merge(
+            final SlotType other,
+            final BiFunction<Timestamp, Timestamp, SlotType> generator
+    ) {
         final BiFunction<TimeSlot, TimeSlot, TimeSlot> mergeLogic = (first, second) -> {
             // Find the overall end time (the second might be included in the first)
             final Timestamp endTime = first.getEndTime().compareTo(second.getEndTime()) > 0
@@ -80,7 +111,19 @@ public interface TimeSlot extends Comparable<TimeSlot> {
         return generator.apply(merged.getStartTime(), merged.getEndTime());
     }
 
-    default <T extends TimeSlot> T merge(final List<T> others, final BiFunction<Timestamp, Timestamp, T> generator) {
+    /**
+     * Merge with a list of other slots
+     * Merging the slot with all the others sorted
+     *
+     * @param others     The list of other slots to merge
+     * @param generator  The method to generate the merged slot
+     * @param <SlotType> The type of the slots, must extend TimeSlot
+     * @return The slot merged with all the others
+     */
+    default <SlotType extends TimeSlot> SlotType merge(
+            final List<SlotType> others,
+            final BiFunction<Timestamp, Timestamp, SlotType> generator
+    ) {
         // Combine the slots
         return others.stream()
                 .sorted()
@@ -90,9 +133,18 @@ public interface TimeSlot extends Comparable<TimeSlot> {
                 );
     }
 
-    default <T extends TimeSlot> Optional<T> getOverlap(
-            final T other,
-            final BiFunction<Timestamp, Timestamp, T> generator) {
+    /**
+     * Get the overlapping range of time with another slot
+     * If two slots touch each other, there is no overlap
+     *
+     * @param other      The other slot
+     * @param generator  The method to generate the overlapping slot
+     * @param <SlotType> The type of the slots, must extend TimeSlot
+     * @return The overlapping slot if present, an empty optional otherwise
+     */
+    default <SlotType extends TimeSlot> Optional<SlotType> getOverlap(
+            final SlotType other,
+            final BiFunction<Timestamp, Timestamp, SlotType> generator) {
         final Optional<TimeSlot> overlap = Optional.ofNullable(this.combine(
                 other,
                 (original) -> null,
@@ -113,19 +165,19 @@ public interface TimeSlot extends Comparable<TimeSlot> {
         }
     }
 
-    default <T extends TimeSlot> Optional<T> getOverlap(
-            final List<T> others,
-            final BiFunction<Timestamp, Timestamp, T> generator) {
-        // Find the overlap, otherwise null
-        return others.stream()
-                .sorted()
-                .filter(other -> this.getOverlap(other, generator).isPresent())
-                .findFirst();
-    }
-
-    default <Other extends TimeSlot, Result extends TimeSlot> Optional<Result> subtract(
-            final Other other,
-            final BiFunction<Timestamp, Timestamp, Result> generator) {
+    /**
+     * Subtract another slot from the current one
+     * The type of the slot being subtracted can be different
+     *
+     * @param other       The slot to subtract
+     * @param generator   The method to generate the remaining slot
+     * @param <OtherType> The type of the slot to subtract
+     * @param <SlotType>  The type of the current slot, and the returned one
+     * @return The remaining slot if present, otherwise an empty optional
+     */
+    default <OtherType extends TimeSlot, SlotType extends TimeSlot> Optional<SlotType> subtract(
+            final OtherType other,
+            final BiFunction<Timestamp, Timestamp, SlotType> generator) {
         final Optional<TimeSlot> subtracted = Optional.ofNullable(this.combine(
                 other,
                 (original) -> original,
@@ -154,19 +206,7 @@ public interface TimeSlot extends Comparable<TimeSlot> {
             return Optional.of(generator.apply(subtracted.get().getStartTime(), subtracted.get().getEndTime()));
         }
     }
-
-    default <T extends TimeSlot> Optional<T> subtract(
-            final List<T> others,
-            final BiFunction<Timestamp, Timestamp, T> generator) {
-        // Combine the slots
-        return Optional.ofNullable(others.stream()
-                .sorted()
-                .reduce(
-                        generator.apply(this.getStartTime(), this.getEndTime()),
-                        (acc, other) -> acc.subtract(other, generator).orElse(null)
-                ));
-    }
-
+    
     @Override
     default int compareTo(TimeSlot other) {
         return this.getStartTime().compareTo(other.getStartTime());
