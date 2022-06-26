@@ -1,32 +1,34 @@
 <template>
-  <div id="app">
-    <nav>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </nav>
-    <router-view/>
-  </div>
+    <v-app id="app">
+        <v-app-bar app>
+            <v-img
+                class="mx-2"
+                src="@/assets/logo/logo_transparent_cropped.png"
+                max-height="40"
+                contain
+            ></v-img>
+        </v-app-bar>
+
+        <v-main>
+            <v-row class="ma-0 py-4 ps-8">
+                <router-view />
+            </v-row>
+        </v-main>
+
+        <v-footer padless>
+            <v-col class="text-center" cols="12">
+                {{ new Date().getFullYear() }} —
+                <strong>With </strong>
+                <v-icon color="red">mdi-heart</v-icon>
+                <strong> by Lodovico Azzini</strong>
+            </v-col>
+        </v-footer>
+    </v-app>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+<script>
+export default {
+    name: 'App',
+    data: () => ({}),
+};
+</script>
