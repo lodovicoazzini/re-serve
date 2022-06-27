@@ -1,8 +1,8 @@
 <template>
     <v-row class="fill-height">
         <MyCalendar
-            :loadEvents="loadEvents"
-            :saveEvent="saveEvent"
+            @save-event="saveEvent"
+            @delete-event="deleteEvent"
         ></MyCalendar>
         <v-col cols="3">
             <div class="text-center ma-4">
@@ -23,13 +23,19 @@ export default {
     },
     data: () => ({
         reserveDialog: false,
+        availabilities: [],
     }),
+    provide() {
+        return {
+            events: this.availabilities,
+        };
+    },
     methods: {
-        loadEvents() {
-            return [];
-        },
         saveEvent(event) {
-            console.log(event);
+            console.log('saving' + event.name);
+        },
+        deleteEvent(event) {
+            console.log('deleting' + event.name);
         },
     },
 };

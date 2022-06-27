@@ -9,7 +9,7 @@
                 ref="calendar"
                 v-model="focus"
                 color="primary"
-                :events="getEvents()"
+                :events="events"
                 :event-color="getEventColor"
                 :type="type"
                 @click:event="showEvent"
@@ -64,16 +64,8 @@ export default {
         CalendarToolbar,
         CalendarEventDetails,
     },
-    props: {
-        loadEvents: {
-            type: Function,
-            required: true,
-        },
-        saveEvent: {
-            type: Function,
-            required: true,
-        },
-    },
+    inject: ['events'],
+    emit: ['save-event', 'delete-event'],
     data: () => ({
         focus: '',
         type: 'week',
@@ -83,7 +75,6 @@ export default {
             day: 'Day',
             '4day': '4 Days',
         },
-        events: [],
         selectedEvent: null,
         ready: false,
         dragEvent: null,
@@ -108,13 +99,18 @@ export default {
     mounted() {
         this.$refs.calendar.checkChange();
         this.ready = true;
-        this.events = this.loadEvents();
         this.scrollToTime();
         this.updateTime();
     },
     methods: {
         getEvents() {
             return this.events;
+        },
+        saveEvent(thisEvent) {
+            this.$emit('save-event', thisEvent);
+        },
+        deleteEvent(thisEvent) {
+            this.$emit('delete-event', thisEvent);
         },
         viewDay({ date }) {
             this.focus = date;
