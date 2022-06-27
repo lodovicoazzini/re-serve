@@ -63,7 +63,7 @@ export default {
         CalendarToolbar,
         CalendarEventDetails,
     },
-    inject: ['events', 'saveEvent', 'deleteEvent'],
+    inject: ['saveEvent', 'deleteEvent', 'getEvents'],
     data: () => ({
         focus: '',
         type: 'week',
@@ -92,6 +92,9 @@ export default {
         },
         eventIsSelected() {
             return this.selectedEvent != null;
+        },
+        events() {
+            return this.getEvents();
         },
     },
     mounted() {

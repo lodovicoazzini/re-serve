@@ -6,6 +6,10 @@ import vuetify from './plugins/vuetify';
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import '@mdi/font/css/materialdesignicons.css';
 
+import axios from 'axios';
+
+Vue.prototype.$http = axios;
+
 Vue.config.productionTip = false;
 
 new Vue({
