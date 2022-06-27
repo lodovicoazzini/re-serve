@@ -9,64 +9,71 @@
                 ref="calendar"
                 v-model="focus"
                 color="primary"
-                :events="events"
+                :events="getEvents()"
                 :event-color="getEventColor"
                 :type="type"
                 @click:event="showEvent"
                 @click:more="viewDay"
                 @click:date="viewDay"
-                @change="getEvents"
                 @mousedown:event="startDrag"
                 @mousedown:time="startTime"
                 @mousemove:time="mouseMove"
                 @mouseup:time="endDrag"
                 @mouseleave.native="cancelDrag"
             >
-                <CalendarNow></CalendarNow>
-                <CalendarDrag></CalendarDrag>
+                <template v-slot:day-body="{ date, week }">
+                    <div
+                        class="v-current-time"
+                        :class="{ first: date === week[0].date }"
+                        :style="{ top: nowY }"
+                    ></div>
+                </template>
+
+                <template v-slot:event="{ event, timed, eventSummary }">
+                    <div>
+                        <div
+                            class="v-event-draggable"
+                            v-html="eventSummary()"
+                        ></div>
+                        <div
+                            v-if="timed"
+                            class="v-event-drag-bottom"
+                            @mousedown.stop="extendBottom(event)"
+                        ></div>
+                    </div>
+                </template>
             </v-calendar>
-            <v-menu
-                v-model="selectedOpen"
-                :close-on-content-click="false"
-                :activator="selectedElement"
-                offset-x
-            >
-                <v-card color="grey lighten-4" min-width="350px" flat>
-                    <v-toolbar :color="selectedEvent.color" dark>
-                        <v-btn icon>
-                            <v-icon>mdi-pencil</v-icon>
-                        </v-btn>
-                        <v-toolbar-title
-                            v-html="selectedEvent.name"
-                        ></v-toolbar-title>
-                        <v-spacer></v-spacer>
-                        <v-btn icon>
-                            <v-icon>mdi-heart</v-icon>
-                        </v-btn>
-                        <v-btn icon>
-                            <v-icon>mdi-dots-vertical</v-icon>
-                        </v-btn>
-                    </v-toolbar>
-                    <v-card-text>
-                        <span v-html="selectedEvent.details"></span>
-                    </v-card-text>
-                    <v-card-actions>
-                        <v-btn outlined @click="selectedOpen = false">
-                            Cancel
-                        </v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-menu>
+            <v-dialog v-model="eventIsSelected" persistent max-width="600px">
+                <CalendarEventDetails
+                    :event="selectedEvent"
+                    :saveEvent="saveEvent"
+                    @close-dialog="selectedEvent = null"
+                ></CalendarEventDetails
+                >>
+            </v-dialog>
         </v-sheet>
     </v-col>
 </template>
 
 <script>
 import CalendarToolbar from '@/components/calendar/CalendarToolbar.vue';
-import CalendarNow from '@/components/calendar/CalendarNow.vue';
-import CalendarDrag from '@/components/calendar/CalendarDrag.vue';
+import CalendarEventDetails from './CalendarEventDetails.vue';
 
 export default {
+    components: {
+        CalendarToolbar,
+        CalendarEventDetails,
+    },
+    props: {
+        loadEvents: {
+            type: Function,
+            required: true,
+        },
+        saveEvent: {
+            type: Function,
+            required: true,
+        },
+    },
     data: () => ({
         focus: '',
         type: 'week',
@@ -76,16 +83,8 @@ export default {
             day: 'Day',
             '4day': '4 Days',
         },
-        selectedEvent: {},
-        selectedElement: null,
-        selectedOpen: false,
-        events: [
-            {
-                start: Date.parse('2022-06-26 10:00:00'),
-                end: Date.parse('2022-06-26 12:00:00'),
-            },
-        ],
-        value: '',
+        events: [],
+        selectedEvent: null,
         ready: false,
         dragEvent: null,
         dragStart: null,
@@ -102,50 +101,30 @@ export default {
                 ? this.cal.timeToY(this.cal.times.now) + 'px'
                 : '-10px';
         },
+        eventIsSelected() {
+            return this.selectedEvent != null;
+        },
     },
     mounted() {
         this.$refs.calendar.checkChange();
         this.ready = true;
+        this.events = this.loadEvents();
         this.scrollToTime();
         this.updateTime();
     },
     methods: {
+        getEvents() {
+            return this.events;
+        },
         viewDay({ date }) {
             this.focus = date;
             this.type = 'day';
         },
-        getEvents() {
-            return this.events;
-        },
         getEventColor() {
             return 'green';
         },
-        setToday() {
-            this.focus = '';
-        },
-        prev() {
-            this.$refs.calendar.prev();
-        },
-        next() {
-            this.$refs.calendar.next();
-        },
-        showEvent({ nativeEvent, event }) {
-            const open = () => {
-                this.selectedEvent = event;
-                this.selectedElement = nativeEvent.target;
-                requestAnimationFrame(() =>
-                    requestAnimationFrame(() => (this.selectedOpen = true))
-                );
-            };
-            if (this.selectedOpen) {
-                this.selectedOpen = false;
-                requestAnimationFrame(() =>
-                    requestAnimationFrame(() => open())
-                );
-            } else {
-                open();
-            }
-            nativeEvent.stopPropagation();
+        showEvent({ event }) {
+            this.selectedEvent = event;
         },
         getCurrentTime() {
             return this.cal
@@ -209,6 +188,8 @@ export default {
             }
         },
         endDrag() {
+            this.createEvent ? this.saveEvent(this.createEvent) : null;
+            this.dragEvent ? this.saveEvent(this.dragEvent) : null;
             this.dragTime = null;
             this.dragEvent = null;
             this.createEvent = null;
@@ -254,10 +235,52 @@ export default {
             return arr[this.rnd(0, arr.length - 1)];
         },
     },
-    components: {
-        CalendarToolbar,
-        CalendarNow,
-        CalendarDrag,
-    },
 };
 </script>
+
+<style lang="scss">
+.v-current-time {
+    height: 2px;
+    background-color: #ea4335;
+    position: absolute;
+    left: -1px;
+    right: 0;
+    pointer-events: none;
+    &.first::before {
+        content: '';
+        position: absolute;
+        background-color: #ea4335;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-top: -5px;
+        margin-left: -6.5px;
+    }
+}
+.v-event-draggable {
+    padding-left: 6px;
+}
+.v-event-drag-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    height: 4px;
+    cursor: ns-resize;
+    &::after {
+        display: none;
+        position: absolute;
+        left: 50%;
+        height: 4px;
+        border-top: 1px solid white;
+        border-bottom: 1px solid white;
+        width: 16px;
+        margin-left: -8px;
+        opacity: 0.8;
+        content: '';
+    }
+    &:hover::after {
+        display: block;
+    }
+}
+</style>

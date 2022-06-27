@@ -60,6 +60,7 @@
 
 <script>
 export default {
+    emits: ['click-today', 'change-calendar-type'],
     methods: {
         setTodayCallback() {
             this.$emit('click-today');

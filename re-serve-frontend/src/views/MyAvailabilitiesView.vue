@@ -1,6 +1,9 @@
 <template>
     <v-row class="fill-height">
-        <MyCalendar></MyCalendar>
+        <MyCalendar
+            :loadEvents="loadEvents"
+            :saveEvent="saveEvent"
+        ></MyCalendar>
         <v-col cols="3">
             <div class="text-center ma-4">
                 <ReserveDialog></ReserveDialog>
@@ -21,5 +24,13 @@ export default {
     data: () => ({
         reserveDialog: false,
     }),
+    methods: {
+        loadEvents() {
+            return [];
+        },
+        saveEvent(event) {
+            console.log(event);
+        },
+    },
 };
 </script>
