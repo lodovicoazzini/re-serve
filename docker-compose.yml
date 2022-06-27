@@ -1,0 +1,39 @@
+version: '2'
+
+services:
+  backend:
+    image: 'reserve-backend:latest'
+    build:
+      context: ./re-serve-backend
+    container_name: reserve-backend
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/compose-postgres
+      - SPRING_DATASOURCE_USERNAME=compose-postgres
+      - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - "8080:8080"
+
+  db:
+    image: 'postgres:13.1-alpine'
+    container_name: reserve-db
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+    ports:
+      - "5432:5432"
+
+  frontend:
+    image: 'reserve-frontend:latest'
+    build: 
+      context: ./re-serve-frontend
+    container_name: reserve-frontend
+    ports:
+      - "8008:80"
+    expose:
+      - 8008
+    depends_on:
+      - backend
+      
