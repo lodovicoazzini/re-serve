@@ -45,8 +45,7 @@
             </v-calendar>
             <v-dialog v-model="eventIsSelected" persistent max-width="600px">
                 <CalendarEventDetails
-                    :event="selectedEvent"
-                    :saveEvent="saveEvent"
+                    :selectedEvent="selectedEvent"
                     @close-dialog="selectedEvent = null"
                 ></CalendarEventDetails
                 >>
@@ -64,8 +63,7 @@ export default {
         CalendarToolbar,
         CalendarEventDetails,
     },
-    inject: ['events'],
-    emit: ['save-event', 'delete-event'],
+    inject: ['events', 'saveEvent', 'deleteEvent'],
     data: () => ({
         focus: '',
         type: 'week',
@@ -103,15 +101,6 @@ export default {
         this.updateTime();
     },
     methods: {
-        getEvents() {
-            return this.events;
-        },
-        saveEvent(thisEvent) {
-            this.$emit('save-event', thisEvent);
-        },
-        deleteEvent(thisEvent) {
-            this.$emit('delete-event', thisEvent);
-        },
         viewDay({ date }) {
             this.focus = date;
             this.type = 'day';

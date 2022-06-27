@@ -1,9 +1,6 @@
 <template>
     <v-row class="fill-height">
-        <MyCalendar
-            @save-event="saveEvent"
-            @delete-event="deleteEvent"
-        ></MyCalendar>
+        <MyCalendar></MyCalendar>
         <v-col cols="3">
             <div class="text-center ma-4">
                 <ReserveDialog></ReserveDialog>
@@ -28,6 +25,8 @@ export default {
     provide() {
         return {
             events: this.availabilities,
+            saveEvent: this.saveEvent,
+            deleteEvent: this.deleteEvent,
         };
     },
     methods: {
@@ -35,6 +34,9 @@ export default {
             console.log('saving' + event.name);
         },
         deleteEvent(event) {
+            this.availabilities = this.availabilities.filter(
+                (availability) => availability.name != event.name
+            );
             console.log('deleting' + event.name);
         },
     },

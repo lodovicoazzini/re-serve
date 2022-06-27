@@ -7,12 +7,12 @@
                         <span class="text-h5">Event Details</span>
                     </v-card-title>
                     <v-text-field
-                        v-model="editedEvent.name"
+                        v-model="safeEvent.name"
                         label="Event Name"
                         required
                     ></v-text-field>
                     <v-row class="mt-1 ml-1">
-                        <v-btn class="mr-4" @click="closeCallback">
+                        <v-btn class="mr-4" @click="closeDialog">
                             cancel
                         </v-btn>
                         <v-btn
@@ -39,29 +39,27 @@
 
 <script>
 export default {
-    data: () => ({
-        // editedEvent: this.event,
-    }),
-    computed: {
-        editedEvent() {
-            return this.event ? this.event : {};
-        },
-    },
     props: {
-        event: Object,
-        saveEvent: Function,
+        selectedEvent: Object,
     },
-    emits: ['close-dialog'],
-    methods: {
-        saveCallback() {
-            this.saveEvent(this.editedEvent);
-            this.closeCallback();
+    computed: {
+        safeEvent() {
+            return this.selectedEvent ? this.selectedEvent : {};
         },
-        closeCallback() {
-            this.$emit('close-dialog', this.editedEvent);
+    },
+    inject: ['saveEvent', 'deleteEvent'],
+    emit: ['close-dialog'],
+    methods: {
+        closeDialog() {
+            this.$emit('close-dialog');
+        },
+        saveCallback() {
+            this.saveEvent(this.safeEvent);
+            this.closeDialog();
         },
         deleteCallback() {
-            this.closeCallback();
+            this.deleteEvent(this.safeEvent);
+            this.closeDialog();
         },
     },
 };
