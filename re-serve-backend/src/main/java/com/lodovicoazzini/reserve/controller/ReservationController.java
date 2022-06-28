@@ -6,10 +6,7 @@ import com.lodovicoazzini.reserve.model.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -20,6 +17,7 @@ import static com.lodovicoazzini.reserve.utils.ControllerUtils.encodeResponse;
 @RestController
 @RequestMapping("/reserve/reservation")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:8081")
 public class ReservationController {
 
     private final ReservationService reservationService;

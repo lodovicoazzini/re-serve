@@ -31,9 +31,9 @@ services:
       context: ./re-serve-frontend
     container_name: reserve-frontend
     ports:
-      - "8008:80"
+      - "8081:80"
     expose:
-      - 8008
+      - 8081
     depends_on:
       - backend
       

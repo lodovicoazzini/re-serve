@@ -37,22 +37,22 @@ export default {
     },
     methods: {
         saveEvent(event) {
-            console.log('saving');
-            console.log(event);
             this.$http
                 .get(
                     `http://localhost:8080/reserve/availability/create/${event.start}/${event.end}`
                 )
-                .then((result) => {
-                    console.log('saved');
-                    console.log(result.data);
+                .then(() => {
                     this.reloadAvailabilities();
                 });
         },
         deleteEvent(event) {
-            this.availabilities = this.availabilities.filter(
-                (availability) => availability.name != event.name
-            );
+            this.$http
+                .get(
+                    `http://localhost:8080/reserve/availability/remove/${event.start}/${event.end}`
+                )
+                .then(() => {
+                    this.reloadAvailabilities();
+                });
         },
         reloadAvailabilities() {
             this.$http
@@ -66,8 +66,6 @@ export default {
                         timed: true,
                     }));
                     this.availabilities = mapped;
-                    console.log('loaded');
-                    console.log(this.availabilities);
                 });
         },
     },

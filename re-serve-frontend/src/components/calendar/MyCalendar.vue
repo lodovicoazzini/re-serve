@@ -75,8 +75,6 @@ export default {
         },
         selectedEvent: null,
         ready: false,
-        dragEvent: null,
-        dragStart: null,
         createEvent: null,
         createStart: null,
         extendOriginal: null,
@@ -129,17 +127,13 @@ export default {
         },
         startDrag({ event, timed }) {
             if (event && timed) {
-                this.dragEvent = event;
                 this.dragTime = null;
                 this.extendOriginal = null;
             }
         },
         startTime(tms) {
             const mouse = this.toTime(tms);
-            if (this.dragEvent && this.dragTime === null) {
-                const start = this.dragEvent.start;
-                this.dragTime = mouse - start;
-            } else {
+            if (this.dragTime !== null) {
                 this.createStart = this.roundTime(mouse);
                 this.createEvent = {
                     name: `Event #${this.events.length}`,
@@ -158,16 +152,7 @@ export default {
         },
         mouseMove(tms) {
             const mouse = this.toTime(tms);
-            if (this.dragEvent && this.dragTime !== null) {
-                const start = this.dragEvent.start;
-                const end = this.dragEvent.end;
-                const duration = end - start;
-                const newStartTime = mouse - this.dragTime;
-                const newStart = this.roundTime(newStartTime);
-                const newEnd = newStart + duration;
-                this.dragEvent.start = newStart;
-                this.dragEvent.end = newEnd;
-            } else if (this.createEvent && this.createStart !== null) {
+            if (this.createEvent && this.createStart !== null) {
                 const mouseRounded = this.roundTime(mouse, false);
                 const min = Math.min(mouseRounded, this.createStart);
                 const max = Math.max(mouseRounded, this.createStart);
@@ -176,10 +161,10 @@ export default {
             }
         },
         endDrag() {
-            this.createEvent ? this.saveEvent(this.createEvent) : null;
-            this.dragEvent ? this.saveEvent(this.dragEvent) : null;
+            if (this.createEvent !== null) {
+                this.saveEvent(this.createEvent);
+            }
             this.dragTime = null;
-            this.dragEvent = null;
             this.createEvent = null;
             this.createStart = null;
             this.extendOriginal = null;
@@ -198,7 +183,6 @@ export default {
             this.createEvent = null;
             this.createStart = null;
             this.dragTime = null;
-            this.dragEvent = null;
         },
         roundTime(time, down = true) {
             const roundTo = 15; // minutes
