@@ -27,10 +27,10 @@ public class ReservationService {
                 .filter(availability -> availability.getOverlapType(reservation) != OverlapType.DISTINCT)
                 .findFirst();
         if (match.isPresent()) {
-            // Included -> merge the reservation with the ones with the same email and title
+            // Included -> merge the reservation with the ones with the same user and title
             final List<Reservation> reservations = this.listReservations().stream()
                     .filter(other -> other.getTitle().equals(reservation.getTitle())
-                            && other.getEmail().equals(reservation.getEmail()))
+                            && other.getReservedBy().equals(reservation.getReservedBy()))
                     .collect(Collectors.toList());
             final Reservation merged = reservation.merge(
                     reservation,
@@ -43,7 +43,7 @@ public class ReservationService {
             saved = Optional.of(reservationRepository.save(reservation));
             // Update the availability
             availabilityService.deleteAvailability(match.get());
-            final Optional<Availability> updated = match.get().subtract(reservation, Availability::new);
+            final Optional<Availability> updated = match.get().subtract(reservation, match.get()::cloneWithSlot);
             // Not fully consumed -> save
             updated.ifPresent(availabilityService::saveAvailability);
         } else {
@@ -57,7 +57,7 @@ public class ReservationService {
         // Delete the reservation
         reservationRepository.delete(reservation);
         // Restore the reserved slot as an availability
-        final Availability restored = new Availability(reservation.getStartTime(), reservation.getEndTime());
+        final Availability restored = new Availability(reservation.getStartTime(), reservation.getEndTime(), reservation.getReservedFrom());
         return availabilityService.saveAvailability(restored);
     }
 

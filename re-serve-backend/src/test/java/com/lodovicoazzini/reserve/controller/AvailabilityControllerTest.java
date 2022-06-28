@@ -1,6 +1,7 @@
 package com.lodovicoazzini.reserve.controller;
 
 import com.lodovicoazzini.reserve.model.entity.Availability;
+import com.lodovicoazzini.reserve.model.entity.User;
 import com.lodovicoazzini.reserve.model.service.AvailabilityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,8 @@ class AvailabilityControllerTest {
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
         mockAvailability = new Availability(
                 Timestamp.valueOf("2022-06-25 09:00:00"),
-                Timestamp.valueOf("2022-06-25 11:00:00")
+                Timestamp.valueOf("2022-06-25 11:00:00"),
+                new User("user@email.com")
         );
     }
 
@@ -49,8 +51,9 @@ class AvailabilityControllerTest {
     void testCreateAvailabilityNew() {
         final String startTime = "2022-06-25 09:00:00";
         final String endTime = "2022-06-25 11:00:00";
+        final String owner = "user@email.com";
         when(this.availabilityService.saveAvailability(any(Availability.class))).thenReturn(mockAvailability);
-        final ResponseEntity<String> response = this.availabilityController.createAvailability(startTime, endTime);
+        final ResponseEntity<String> response = this.availabilityController.createAvailability(startTime, endTime, owner);
         assertEquals(encodeResponse(mockAvailability, HttpStatus.CREATED), response);
     }
 
@@ -58,7 +61,8 @@ class AvailabilityControllerTest {
     void testCreateAvailabilityInvalidTimeString() {
         final String startTime = "2022-06-2509:00:00";
         final String endTime = "2022-06-25 11:00:00";
-        final ResponseEntity<String> response = availabilityController.createAvailability(startTime, endTime);
+        final String owner = "user@email.com";
+        final ResponseEntity<String> response = availabilityController.createAvailability(startTime, endTime, owner);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
@@ -66,7 +70,8 @@ class AvailabilityControllerTest {
     void testCreateAvailabilityZeroDuration() {
         final String startTime = "2022-06-25 09:00:00";
         final String endTime = "2022-06-25 09:00:00";
-        final ResponseEntity<String> response = availabilityController.createAvailability(startTime, endTime);
+        final String owner = "user@email.com";
+        final ResponseEntity<String> response = availabilityController.createAvailability(startTime, endTime, owner);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
@@ -74,7 +79,8 @@ class AvailabilityControllerTest {
     void testCreateAvailabilityNegativeDuration() {
         final String startTime = "2022-06-25 09:00:00";
         final String endTime = "2022-06-25 08:00:00";
-        final ResponseEntity<String> response = availabilityController.createAvailability(startTime, endTime);
+        final String owner = "user@email.com";
+        final ResponseEntity<String> response = availabilityController.createAvailability(startTime, endTime, owner);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
@@ -82,14 +88,17 @@ class AvailabilityControllerTest {
     void testCreateAvailabilityMerge() {
         final String startTime = "2022-06-25 10:00:00";
         final String endTime = "2022-06-25 12:00:00";
+        final String owner = "user@email.com";
         final Availability overlapping = new Availability(
                 Timestamp.valueOf("2022-06-25 09:00:00"),
-                Timestamp.valueOf("2022-06-25 11:00:00")
+                Timestamp.valueOf("2022-06-25 11:00:00"),
+                new User(owner)
         );
         when(availabilityService.saveAvailability(any(Availability.class))).thenReturn(overlapping);
         final ResponseEntity<String> response = availabilityController.createAvailability(
                 startTime,
-                endTime
+                endTime,
+                owner
         );
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -98,14 +107,17 @@ class AvailabilityControllerTest {
     void testCreateAvailabilityDuplicate() {
         final String startTime = "2022-06-25 10:00:00";
         final String endTime = "2022-06-25 12:00:00";
+        final String owner = "user@email.com";
         final Availability duplicate = new Availability(
                 Timestamp.valueOf(startTime),
-                Timestamp.valueOf(endTime)
+                Timestamp.valueOf(endTime),
+                new User(owner)
         );
         when(availabilityService.saveAvailability(any(Availability.class))).thenReturn(duplicate);
         final ResponseEntity<String> response = availabilityController.createAvailability(
                 startTime,
-                endTime
+                endTime,
+                owner
         );
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
@@ -116,7 +128,8 @@ class AvailabilityControllerTest {
         doNothing().when(availabilityService).deleteAvailability(any(Availability.class));
         final ResponseEntity<Integer> response = availabilityController.removeAvailability(
                 "2022-06-25 09:00:00",
-                "2022-06-25 11:00:00"
+                "2022-06-25 11:00:00",
+                "user@email.com"
         );
         assertEquals(new ResponseEntity<>(1, HttpStatus.OK), response);
     }
@@ -126,7 +139,8 @@ class AvailabilityControllerTest {
         when(availabilityService.findAvailabilitiesLike(any(Availability.class))).thenReturn(new ArrayList<>());
         final ResponseEntity<Integer> response = availabilityController.removeAvailability(
                 "2022-06-25 09:00:00",
-                "2022-06-25 11:00:00"
+                "2022-06-25 11:00:00",
+                "user@email.com"
         );
         assertEquals(new ResponseEntity<>(0, HttpStatus.OK), response);
     }
@@ -136,7 +150,8 @@ class AvailabilityControllerTest {
         when(availabilityService.subtractAvailability(any(Availability.class))).thenReturn(1);
         final ResponseEntity<Integer> response = availabilityController.subtractAvailability(
                 "2022-06-25 09:00:00",
-                "2022-06-25 10:00:00"
+                "2022-06-25 10:00:00",
+                "user@email.com"
         );
         assertEquals(new ResponseEntity<>(1, HttpStatus.OK), response);
     }

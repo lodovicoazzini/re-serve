@@ -1,6 +1,7 @@
 package com.lodovicoazzini.reserve.controller;
 
 import com.lodovicoazzini.reserve.model.entity.Reservation;
+import com.lodovicoazzini.reserve.model.entity.User;
 import com.lodovicoazzini.reserve.model.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,8 @@ class ReservationControllerTest {
                 Timestamp.valueOf("2022-06-25 09:00:00"),
                 Timestamp.valueOf("2022-06-25 11:00:00"),
                 "my first reservation",
-                "my.email@reserve.com"
+                new User("my.email@reserve.com"),
+                new User("my.email@reserve.com")
         );
     }
 
@@ -55,6 +57,7 @@ class ReservationControllerTest {
                 startTime,
                 endTime,
                 title,
+                email,
                 email
         );
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -71,6 +74,7 @@ class ReservationControllerTest {
                 startTime,
                 endTime,
                 title,
+                email,
                 email
         );
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -87,6 +91,7 @@ class ReservationControllerTest {
                 startTime,
                 endTime,
                 title,
+                email,
                 email
         );
         assertEquals(HttpStatus.OK, response.getStatusCode());

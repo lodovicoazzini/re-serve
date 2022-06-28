@@ -23,6 +23,11 @@ public class Availability implements TimeSlot {
     @Column(name = "end_time", nullable = false)
     private Timestamp endTime;
 
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
     public Availability() {
     }
 
@@ -33,12 +38,25 @@ public class Availability implements TimeSlot {
      * @param endTime   The end time of the availability slot
      * @throws IllegalArgumentException If the slot duration is not positive
      */
-    public Availability(Timestamp startTime, Timestamp endTime) throws IllegalArgumentException {
+    public Availability(Timestamp startTime, Timestamp endTime, User owner) throws IllegalArgumentException {
         if (endTime.compareTo(startTime) <= 0) {
             throw new IllegalArgumentException("The time interval must have a positive duration");
         }
         this.startTime = startTime;
         this.endTime = endTime;
+        this.owner = owner;
+    }
+
+    public Availability cloneWithSlot(final Timestamp startTime, final Timestamp endTime) {
+        return new Availability(startTime, endTime, this.owner);
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 
     public Long getId() {
@@ -73,7 +91,7 @@ public class Availability implements TimeSlot {
 
     @Override
     public String toString() {
-        return "Availability{start=%s, end=%s}".formatted(startTime, endTime);
+        return "Availability{startTime=%s, endTime=%s, owner=%s}".formatted(startTime, endTime, owner);
     }
 
     @Override
@@ -81,11 +99,11 @@ public class Availability implements TimeSlot {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Availability that = (Availability) o;
-        return startTime.equals(that.startTime) && endTime.equals(that.endTime);
+        return startTime.equals(that.startTime) && endTime.equals(that.endTime) && owner.equals(that.owner);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startTime, endTime);
+        return Objects.hash(startTime, endTime, owner);
     }
 }

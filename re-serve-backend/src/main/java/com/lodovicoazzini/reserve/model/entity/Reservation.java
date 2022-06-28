@@ -26,8 +26,13 @@ public class Reservation implements TimeSlot {
     @Column(name = "title", nullable = false, columnDefinition = "TEXT")
     private String title;
 
-    @Column(name = "email", nullable = false, columnDefinition = "TEXT")
-    private String email;
+    @ManyToOne
+    @JoinColumn(name = "reserved_by_id")
+    private User reservedBy;
+
+    @ManyToOne
+    @JoinColumn(name = "reserved_from_id")
+    private User reservedFrom;
 
     public Reservation() {
     }
@@ -39,18 +44,35 @@ public class Reservation implements TimeSlot {
      * @param endTime   The end time of the availability slot
      * @throws IllegalArgumentException If the slot duration is not positive
      */
-    public Reservation(Timestamp startTime, Timestamp endTime, String title, String email) throws IllegalArgumentException {
+    public Reservation(Timestamp startTime, Timestamp endTime, String title, User reservedBy, User reservedFrom) throws IllegalArgumentException {
         if (endTime.compareTo(startTime) <= 0) {
             throw new IllegalArgumentException("The time interval must have a positive duration");
         }
         this.startTime = startTime;
         this.endTime = endTime;
         this.title = title;
-        this.email = email;
+        this.reservedBy = reservedBy;
+        this.reservedFrom = reservedFrom;
     }
 
     public Reservation cloneWithSlot(final Timestamp startTime, final Timestamp endTime) {
-        return new Reservation(startTime, endTime, this.title, this.email);
+        return new Reservation(startTime, endTime, this.title, this.reservedBy, this.reservedFrom);
+    }
+
+    public User getReservedFrom() {
+        return reservedFrom;
+    }
+
+    public void setReservedFrom(User reservedFrom) {
+        this.reservedFrom = reservedFrom;
+    }
+
+    public User getReservedBy() {
+        return reservedBy;
+    }
+
+    public void setReservedBy(User reservedBy) {
+        this.reservedBy = reservedBy;
     }
 
     public Long getId() {
@@ -91,17 +113,9 @@ public class Reservation implements TimeSlot {
         this.title = title;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     @Override
     public String toString() {
-        return "Reservation{start=%s, end=%s, title='%s', email='%s'}".formatted(startTime, endTime, title, email);
+        return "Reservation{startTime=%s, endTime=%s, title='%s', reservedBy=%s, reservedFrom=%s}".formatted(startTime, endTime, title, reservedBy, reservedFrom);
     }
 
     @Override
@@ -109,11 +123,11 @@ public class Reservation implements TimeSlot {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Reservation that = (Reservation) o;
-        return startTime.equals(that.startTime) && endTime.equals(that.endTime) && title.equals(that.title) && email.equals(that.email);
+        return startTime.equals(that.startTime) && endTime.equals(that.endTime) && title.equals(that.title) && reservedBy.equals(that.reservedBy) && reservedFrom.equals(that.reservedFrom);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startTime, endTime, title, email);
+        return Objects.hash(startTime, endTime, title, reservedBy, reservedFrom);
     }
 }

@@ -22,7 +22,7 @@ public class AvailabilityService {
         final List<Availability> availabilities = this.listAvailabilities();
         final Availability merged = availability.merge(
                 availabilities,
-                Availability::new
+                availability::cloneWithSlot
         );
         // Remove the previous availabilities
         availabilities.stream()
@@ -43,13 +43,13 @@ public class AvailabilityService {
                 .collect(Collectors.toList());
         // Subtract the availability from the list and update the persisted value
         availabilities.forEach(saved -> {
-                    // Delete the saved availability
-                    this.deleteAvailability(saved);
-                    // Subtract the availability
-                    final Optional<Availability> subtracted = saved.subtract(availability, Availability::new);
-                    // If the availability is not completely deleted -> save the remainder
-                    subtracted.ifPresent(this::saveAvailability);
-                });
+            // Delete the saved availability
+            this.deleteAvailability(saved);
+            // Subtract the availability
+            final Optional<Availability> subtracted = saved.subtract(availability, availability::cloneWithSlot);
+            // If the availability is not completely deleted -> save the remainder
+            subtracted.ifPresent(this::saveAvailability);
+        });
         // Return the number of affected availabilities
         return availabilities.size();
     }
