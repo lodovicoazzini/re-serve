@@ -64,8 +64,9 @@ export default {
                         start: availability.startTime,
                         end: availability.endTime,
                         name: null,
-                        color: 'green',
+                        color: 'grey',
                         timed: true,
+                        editable: false,
                     }));
                     this.availabilities = mapped;
                 },

@@ -66,6 +66,7 @@ export default {
                         name: null,
                         color: 'green',
                         timed: true,
+                        editable: true,
                     }));
                     this.availabilities = mapped;
                 },

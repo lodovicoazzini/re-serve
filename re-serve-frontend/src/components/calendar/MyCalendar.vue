@@ -108,11 +108,13 @@ export default {
             this.focus = date;
             this.type = 'day';
         },
-        getEventColor() {
-            return 'green';
+        getEventColor(event) {
+            return event.color;
         },
         showEvent({ event }) {
-            this.selectedEvent = event;
+            if (event.editable) {
+                this.selectedEvent = event;
+            }
         },
         getCurrentTime() {
             return this.cal
@@ -128,7 +130,7 @@ export default {
             setInterval(() => this.cal.updateTimes(), 60 * 1000);
         },
         startDrag({ event, timed }) {
-            if (event && timed) {
+            if (event && timed && event.editable) {
                 this.dragEvent = event;
                 this.dragTime = null;
                 this.extendOriginal = null;
@@ -136,12 +138,10 @@ export default {
         },
         startTime(tms) {
             const mouse = this.toTime(tms);
-            console.log('entered start time');
             if (this.dragEvent && this.dragTime === null) {
                 const start = this.dragEvent.start;
                 this.dragTime = mouse - start;
             } else {
-                console.log('entered start time condition');
                 this.createStart = this.roundTime(mouse);
                 this.createEvent = {
                     name: `Event #${this.events.length}`,
@@ -154,12 +154,13 @@ export default {
             }
         },
         extendBottom(event) {
-            this.createEvent = event;
-            this.createStart = event.start;
-            this.extendOriginal = event.end;
+            if (event.editable) {
+                this.createEvent = event;
+                this.createStart = event.start;
+                this.extendOriginal = event.end;
+            }
         },
         mouseMove(tms) {
-            console.log('entered move mause');
             const mouse = this.toTime(tms);
             if (this.createEvent && this.createStart !== null) {
                 const mouseRounded = this.roundTime(mouse, false);
@@ -170,9 +171,7 @@ export default {
             }
         },
         endDrag() {
-            console.log('entered end drag');
             if (this.createEvent !== null) {
-                console.log('entered end drag condition');
                 this.saveEvent(this.createEvent);
             }
             this.dragTime = null;
