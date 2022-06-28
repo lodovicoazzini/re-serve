@@ -10,16 +10,18 @@ export default new Vuex.Store({
             storage: window.sessionStorage,
         }),
     ],
-    state: {
-        user: {
-            email: null,
-        },
+    state() {
+        return {
+            user: {
+                email: null,
+            },
+        };
     },
     getters: {
         isAuthenticated(state) {
             return state.user.email != null;
         },
-        getUserEmail(state) {
+        userEmail(state) {
             return state.user.email;
         },
     },

@@ -25,6 +25,11 @@ export default {
             eventColor: 'green',
         };
     },
+    computed: {
+        userEmail() {
+            return this.$store.getters.userEmail;
+        },
+    },
     provide() {
         return {
             getEvents: () => this.availabilities,
@@ -38,7 +43,7 @@ export default {
     methods: {
         saveAvailability(event) {
             this.backendLink.get(
-                `availability/create/${event.start}/${event.end}`,
+                `availability/create/${event.start}/${event.end}/${this.userEmail}`,
                 () => this.reloadAvailabilities(),
                 (message) => {
                     console.log(message);
@@ -48,7 +53,7 @@ export default {
         },
         deleteAvailability(event) {
             this.backendLink.get(
-                `availability/remove/${event.start}/${event.end}`,
+                `availability/remove/${event.start}/${event.end}/${this.userEmail}`,
                 () => this.reloadAvailabilities(),
                 (message) => {
                     console.log(message);
@@ -58,7 +63,7 @@ export default {
         },
         reloadAvailabilities() {
             this.backendLink.get(
-                `availability/list`,
+                `user/listAvailabilities/${this.userEmail}`,
                 (response) => {
                     const mapped = response.data.map((availability) => ({
                         start: availability.startTime,

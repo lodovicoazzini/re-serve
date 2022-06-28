@@ -55,7 +55,7 @@ export default {
     methods: {
         submit() {
             this.$refs.observer.validate();
-            this.$store.commit('authenticate', email);
+            this.$store.commit('authenticate', this.email);
             this.$router.push({ name: 'my-availabilities' }).catch(() => {});
         },
     },
