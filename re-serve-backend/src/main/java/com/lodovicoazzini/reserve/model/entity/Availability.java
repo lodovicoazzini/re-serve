@@ -24,7 +24,7 @@ public class Availability implements TimeSlot {
     private Timestamp endTime;
 
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
     @JoinColumn(name = "owner_id")
     private User owner;
 

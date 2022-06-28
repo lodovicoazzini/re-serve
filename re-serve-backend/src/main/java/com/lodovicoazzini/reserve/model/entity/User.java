@@ -1,6 +1,9 @@
 package com.lodovicoazzini.reserve.model.entity;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "reserve_user")
@@ -18,6 +21,15 @@ public class User {
 
     @Column(name = "email", nullable = false, columnDefinition = "TEXT")
     private String email;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    private List<Availability> availabilities;
+
+    @OneToMany(mappedBy = "reservedBy", cascade = CascadeType.ALL)
+    private List<Reservation> reservations;
+
+    @OneToMany(mappedBy = "reservedFrom", cascade = CascadeType.ALL)
+    private List<Reservation> commitments;
 
     public User() {
     }
@@ -40,6 +52,42 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Collection<Availability> getAvailabilities() {
+        return availabilities;
+    }
+
+    public void addAvailability(final Availability availability) {
+        if (this.availabilities == null) {
+            this.availabilities = new ArrayList<>();
+        }
+        this.availabilities.add(availability);
+        availability.setOwner(this);
+    }
+
+    public List<Reservation> getCommitments() {
+        return commitments;
+    }
+
+    public Collection<Reservation> getReservations() {
+        return reservations;
+    }
+
+    public void addReservation(final Reservation reservation) {
+        if (this.reservations == null) {
+            this.reservations = new ArrayList<>();
+        }
+        this.reservations.add(reservation);
+        reservation.setReservedBy(this);
+    }
+
+    public void addCommitment(final Reservation reservation) {
+        if (this.commitments == null) {
+            this.commitments = new ArrayList<>();
+        }
+        this.commitments.add(reservation);
+        reservation.setReservedFrom(this);
     }
 
     @Override

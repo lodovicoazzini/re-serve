@@ -26,11 +26,11 @@ public class Reservation implements TimeSlot {
     @Column(name = "title", nullable = false, columnDefinition = "TEXT")
     private String title;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
     @JoinColumn(name = "reserved_by_id")
     private User reservedBy;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
     @JoinColumn(name = "reserved_from_id")
     private User reservedFrom;
 
