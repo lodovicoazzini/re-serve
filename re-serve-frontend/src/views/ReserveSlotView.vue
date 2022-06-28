@@ -25,6 +25,17 @@ export default {
             eventColor: 'orange',
         };
     },
+    props: {
+        calendarEmail: {
+            type: String,
+            required: true,
+        },
+    },
+    computed: {
+        userEmail() {
+            return this.$store.getters.userEmail;
+        },
+    },
     provide() {
         return {
             getEvents: () => this.events,
@@ -37,9 +48,8 @@ export default {
     },
     methods: {
         saveReservation(event) {
-            console.log(this.$store.getters.getUserEmail);
             this.backendLink.get(
-                `reservation/create/${event.start}/${event.end}/${event.name}/email`,
+                `reservation/create/${event.start}/${event.end}/${event.name}/${this.userEmail}/${this.calendarEmail}`,
                 () => this.reloadEvents(),
                 (message) => {
                     console.log(message);
@@ -48,8 +58,9 @@ export default {
             );
         },
         deleteReservation(event) {
+            console.log('deleting the reservations');
             this.backendLink.get(
-                `reservation/remove/${event.start}/${event.end}/'email'`,
+                `reservation/remove/${event.start}/${event.end}/${this.userEmail}`,
                 () => this.reloadEvents(),
                 (message) => {
                     console.log(message);
@@ -60,7 +71,7 @@ export default {
         reloadEvents() {
             this.events = [];
             this.backendLink.get(
-                `availability/list`,
+                `user/listAvailabilities/${this.calendarEmail}`,
                 (response) => {
                     const mapped = response.data.map((availability) => ({
                         start: availability.startTime,
@@ -75,7 +86,7 @@ export default {
                 (message) => console.log(message)
             );
             this.backendLink.get(
-                `reservation/list`,
+                `user/listReservations/${this.calendarEmail}/${this.userEmail}`,
                 (response) => {
                     const mapped = response.data.map((availability) => ({
                         start: availability.startTime,
@@ -89,6 +100,9 @@ export default {
                 },
                 (message) => console.log(message)
             );
+        },
+        backCallback() {
+            this.$router.push({ name: 'my-availabilities' }).catch(() => {});
         },
     },
 };

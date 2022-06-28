@@ -51,7 +51,14 @@ export default {
         handleNext() {
             if (this.email != '') {
                 this.dialog = false;
-                this.$router.push({ name: 'reserve-slot' }).catch(() => {});
+                this.$router
+                    .push({
+                        name: 'reserve-slot',
+                        params: {
+                            calendarEmail: this.email,
+                        },
+                    })
+                    .catch(() => {});
             }
         },
     },

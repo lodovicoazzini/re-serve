@@ -21,7 +21,7 @@ export default {
     data() {
         return {
             reserveDialog: false,
-            availabilities: [],
+            events: [],
             eventColor: 'green',
         };
     },
@@ -32,36 +32,37 @@ export default {
     },
     provide() {
         return {
-            getEvents: () => this.availabilities,
+            getEvents: () => this.events,
             saveEvent: this.saveAvailability,
-            deleteEvent: this.deleteAvailability,
+            deleteEvent: this.deleteEvent,
         };
     },
     mounted() {
-        this.reloadAvailabilities();
+        this.reloadEvents();
     },
     methods: {
         saveAvailability(event) {
             this.backendLink.get(
                 `availability/create/${event.start}/${event.end}/${this.userEmail}`,
-                () => this.reloadAvailabilities(),
+                () => this.reloadEvents(),
                 (message) => {
                     console.log(message);
-                    this.reloadAvailabilities();
+                    this.reloadEvents();
                 }
             );
         },
-        deleteAvailability(event) {
+        deleteEvent(event) {
             this.backendLink.get(
-                `availability/remove/${event.start}/${event.end}/${this.userEmail}`,
-                () => this.reloadAvailabilities(),
+                `${event.type}/remove/${event.start}/${event.end}/${this.userEmail}`,
+                () => this.reloadEvents(),
                 (message) => {
                     console.log(message);
-                    this.reloadAvailabilities();
+                    this.reloadEvents();
                 }
             );
         },
-        reloadAvailabilities() {
+        reloadEvents() {
+            this.events = [];
             this.backendLink.get(
                 `user/listAvailabilities/${this.userEmail}`,
                 (response) => {
@@ -72,8 +73,25 @@ export default {
                         color: this.eventColor,
                         timed: true,
                         editable: true,
+                        type: 'availability',
                     }));
-                    this.availabilities = mapped;
+                    this.events = this.events.concat(mapped);
+                },
+                (message) => console.log(message)
+            );
+            this.backendLink.get(
+                `user/listReservations/${this.userEmail}`,
+                (response) => {
+                    const mapped = response.data.map((availability) => ({
+                        start: availability.startTime,
+                        end: availability.endTime,
+                        name: null,
+                        color: 'orange',
+                        timed: true,
+                        editable: true,
+                        type: 'reservation',
+                    }));
+                    this.events = this.events.concat(mapped);
                 },
                 (message) => console.log(message)
             );

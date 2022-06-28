@@ -18,9 +18,10 @@ const routes = [
         component: AuthenticateView,
     },
     {
-        path: '/reserve-slot',
+        path: '/reserve-slot/:calendarEmail',
         name: 'reserve-slot',
         component: ReserveSlotView,
+        props: true,
     },
     {
         path: '/about',
