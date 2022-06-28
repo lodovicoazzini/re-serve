@@ -1,6 +1,6 @@
 <template>
     <v-row class="fill-height">
-        <MyCalendar></MyCalendar>
+        <MyCalendar :eventColor="eventColor"></MyCalendar>
         <v-col cols="3">
             <div class="text-center ma-4">
                 <v-btn color="error" block dark @click="backCallback">
@@ -21,42 +21,44 @@ export default {
     data() {
         return {
             reserveDialog: false,
-            availabilities: [],
+            events: [],
+            eventColor: 'orange',
         };
     },
     provide() {
         return {
-            getEvents: () => this.availabilities,
-            events: this.availabilities,
-            saveEvent: this.saveEvent,
-            deleteEvent: this.deleteEvent,
+            getEvents: () => this.events,
+            saveEvent: this.saveReservation,
+            deleteEvent: this.deleteReservation,
         };
     },
     mounted() {
-        this.reloadAvailabilities();
+        this.reloadEvents();
     },
     methods: {
-        saveEvent(event) {
+        saveReservation(event) {
+            console.log(this.$store.getters.getUserEmail);
             this.backendLink.get(
-                `availability/create/${event.start}/${event.end}`,
-                () => this.reloadAvailabilities(),
+                `reservation/create/${event.start}/${event.end}/${event.name}/email`,
+                () => this.reloadEvents(),
                 (message) => {
                     console.log(message);
-                    this.reloadAvailabilities();
+                    this.reloadEvents();
                 }
             );
         },
-        deleteEvent(event) {
+        deleteReservation(event) {
             this.backendLink.get(
-                `availability/remove/${event.start}/${event.end}`,
-                () => this.reloadAvailabilities(),
+                `reservation/remove/${event.start}/${event.end}/'email'`,
+                () => this.reloadEvents(),
                 (message) => {
                     console.log(message);
-                    this.reloadAvailabilities();
+                    this.reloadEvents();
                 }
             );
         },
-        reloadAvailabilities() {
+        reloadEvents() {
+            this.events = [];
             this.backendLink.get(
                 `availability/list`,
                 (response) => {
@@ -68,13 +70,25 @@ export default {
                         timed: true,
                         editable: false,
                     }));
-                    this.availabilities = mapped;
+                    this.events = this.events.concat(mapped);
                 },
                 (message) => console.log(message)
             );
-        },
-        backCallback() {
-            this.$router.push({ name: 'my-availabilities' }).catch(() => {});
+            this.backendLink.get(
+                `reservation/list`,
+                (response) => {
+                    const mapped = response.data.map((availability) => ({
+                        start: availability.startTime,
+                        end: availability.endTime,
+                        name: availability.title,
+                        color: this.eventColor,
+                        timed: true,
+                        editable: true,
+                    }));
+                    this.events = this.events.concat(mapped);
+                },
+                (message) => console.log(message)
+            );
         },
     },
 };

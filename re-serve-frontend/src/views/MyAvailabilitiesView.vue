@@ -1,6 +1,6 @@
 <template>
     <v-row class="fill-height">
-        <MyCalendar></MyCalendar>
+        <MyCalendar :eventColor="eventColor"></MyCalendar>
         <v-col cols="3">
             <div class="text-center ma-4">
                 <ReserveDialog></ReserveDialog>
@@ -22,21 +22,21 @@ export default {
         return {
             reserveDialog: false,
             availabilities: [],
+            eventColor: 'green',
         };
     },
     provide() {
         return {
             getEvents: () => this.availabilities,
-            events: this.availabilities,
-            saveEvent: this.saveEvent,
-            deleteEvent: this.deleteEvent,
+            saveEvent: this.saveAvailability,
+            deleteEvent: this.deleteAvailability,
         };
     },
     mounted() {
         this.reloadAvailabilities();
     },
     methods: {
-        saveEvent(event) {
+        saveAvailability(event) {
             this.backendLink.get(
                 `availability/create/${event.start}/${event.end}`,
                 () => this.reloadAvailabilities(),
@@ -46,7 +46,7 @@ export default {
                 }
             );
         },
-        deleteEvent(event) {
+        deleteAvailability(event) {
             this.backendLink.get(
                 `availability/remove/${event.start}/${event.end}`,
                 () => this.reloadAvailabilities(),
@@ -64,7 +64,7 @@ export default {
                         start: availability.startTime,
                         end: availability.endTime,
                         name: null,
-                        color: 'green',
+                        color: this.eventColor,
                         timed: true,
                         editable: true,
                     }));

@@ -63,6 +63,12 @@ export default {
         CalendarToolbar,
         CalendarEventDetails,
     },
+    props: {
+        eventColor: {
+            type: String,
+            required: true,
+        },
+    },
     inject: ['saveEvent', 'deleteEvent', 'getEvents'],
     data: () => ({
         focus: '',
@@ -144,8 +150,8 @@ export default {
             } else {
                 this.createStart = this.roundTime(mouse);
                 this.createEvent = {
-                    name: `Event #${this.events.length}`,
-                    color: 'green',
+                    name: `Event ${this.events.length}`,
+                    color: this.eventColor,
                     start: this.createStart,
                     end: this.createStart,
                     timed: true,

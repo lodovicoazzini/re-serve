@@ -11,19 +11,21 @@ export default new Vuex.Store({
         }),
     ],
     state: {
-        user_email: null,
+        user: {
+            email: null,
+        },
     },
     getters: {
         isAuthenticated(state) {
-            return state.user_email != null;
+            return state.user.email != null;
         },
         getUserEmail(state) {
-            return state.user_email;
+            return state.user.email;
         },
     },
     mutations: {
         authenticate(state, email) {
-            state.user_email = email;
+            state.user.email = email;
         },
     },
     actions: {},
