@@ -6,9 +6,9 @@ import vuetify from './plugins/vuetify';
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import '@mdi/font/css/materialdesignicons.css';
 
-import axios from 'axios';
+import services from './services';
 
-Vue.prototype.$http = axios;
+Vue.use(services);
 
 Vue.config.productionTip = false;
 

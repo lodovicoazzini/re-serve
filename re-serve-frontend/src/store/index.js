@@ -11,6 +11,9 @@ export default new Vuex.Store({
         isAuthenticated(state) {
             return state.user_email != null;
         },
+        userEmail(state) {
+            return state.user_email;
+        },
     },
     mutations: {
         authenticate(state, email) {

@@ -37,28 +37,30 @@ export default {
     },
     methods: {
         saveEvent(event) {
-            this.$http
-                .get(
-                    `http://localhost:8080/reserve/availability/create/${event.start}/${event.end}`
-                )
-                .then(() => {
+            this.backendLink.get(
+                `availability/create/${event.start}/${event.end}`,
+                () => this.reloadAvailabilities(),
+                (message) => {
+                    console.log(message);
                     this.reloadAvailabilities();
-                });
+                }
+            );
         },
         deleteEvent(event) {
-            this.$http
-                .get(
-                    `http://localhost:8080/reserve/availability/remove/${event.start}/${event.end}`
-                )
-                .then(() => {
+            this.backendLink.get(
+                `availability/remove/${event.start}/${event.end}`,
+                () => this.reloadAvailabilities(),
+                (message) => {
+                    console.log(message);
                     this.reloadAvailabilities();
-                });
+                }
+            );
         },
         reloadAvailabilities() {
-            this.$http
-                .get(`http://localhost:8080/reserve/availability/list`)
-                .then((result) => {
-                    const mapped = result.data.map((availability) => ({
+            this.backendLink.get(
+                `availability/list`,
+                (response) => {
+                    const mapped = response.data.map((availability) => ({
                         start: availability.startTime,
                         end: availability.endTime,
                         name: null,
@@ -66,7 +68,9 @@ export default {
                         timed: true,
                     }));
                     this.availabilities = mapped;
-                });
+                },
+                (message) => console.log(message)
+            );
         },
     },
 };

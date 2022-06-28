@@ -1,14 +1,19 @@
 <template>
-    <div>
-        <v-img contain src="@/assets/logo/logo_transparent_cropped.png"></v-img>
+    <v-col cols="12" class="mt-8" justify="center">
+        <v-row justify="center">
+            <span class="text-h2 text-center text-capitalize">
+                who's there?
+            </span>
+        </v-row>
         <validation-observer ref="observer" v-slot="{ invalid }">
-            <form @submit.prevent="submit">
+            <form @submit.prevent="submit" width="100%">
                 <validation-provider
                     v-slot="{ errors }"
                     name="email"
                     rules="required|email"
                 >
                     <v-text-field
+                        width="100%"
                         v-model="email"
                         :error-messages="errors"
                         label="E-mail"
@@ -19,7 +24,7 @@
                 <v-btn type="submit" :disabled="invalid"> continue </v-btn>
             </form>
         </validation-observer>
-    </div>
+    </v-col>
 </template>
 
 <script>
