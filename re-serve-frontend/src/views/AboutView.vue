@@ -1,5 +1,5 @@
 <template>
-  <div class="about-view">
-    <h1>This is an about page</h1>
-  </div>
+    <v-col>
+        <v-img src="@/assets/logo/logo_transparent_cropped.png" contain></v-img>
+    </v-col>
 </template>

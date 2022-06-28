@@ -2,7 +2,7 @@
     <v-col cols="12" class="mt-8" justify="center">
         <v-row justify="center">
             <span class="text-h2 text-center text-capitalize">
-                who's there?
+                who's there ?
             </span>
         </v-row>
         <validation-observer ref="observer" v-slot="{ invalid }">
