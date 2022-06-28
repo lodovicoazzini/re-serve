@@ -17,9 +17,9 @@ new Vue({
     store,
     vuetify,
     render: (h) => h(App),
-    // beforeCreate() {
-    //     if (!this.$store.getters.isAuthenticated) {
-    //         this.$router.push({ name: 'authenticate' }).catch(() => {});
-    //     }
-    // },
+    beforeCreate() {
+        if (!this.$store.getters.isAuthenticated) {
+            this.$router.push({ name: 'authenticate' }).catch(() => {});
+        }
+    },
 }).$mount('#app');

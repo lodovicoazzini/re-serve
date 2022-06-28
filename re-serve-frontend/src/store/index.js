@@ -1,9 +1,15 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import createPersistedState from 'vuex-persistedstate';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
+    plugins: [
+        createPersistedState({
+            storage: window.sessionStorage,
+        }),
+    ],
     state: {
         user_email: null,
     },
@@ -11,7 +17,7 @@ export default new Vuex.Store({
         isAuthenticated(state) {
             return state.user_email != null;
         },
-        userEmail(state) {
+        getUserEmail(state) {
             return state.user_email;
         },
     },
