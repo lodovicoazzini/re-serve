@@ -1,5 +1,7 @@
 package com.lodovicoazzini.reserve.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,12 +24,15 @@ public class User {
     @Column(name = "email", nullable = false, columnDefinition = "TEXT")
     private String email;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Availability> availabilities;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "reservedBy", cascade = CascadeType.ALL)
     private List<Reservation> reservations;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "reservedFrom", cascade = CascadeType.ALL)
     private List<Reservation> commitments;
 
@@ -54,7 +59,7 @@ public class User {
         this.email = email;
     }
 
-    public Collection<Availability> getAvailabilities() {
+    public List<Availability> getAvailabilities() {
         return availabilities;
     }
 

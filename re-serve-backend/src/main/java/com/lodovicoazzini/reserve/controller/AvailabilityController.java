@@ -3,6 +3,7 @@ package com.lodovicoazzini.reserve.controller;
 import com.lodovicoazzini.reserve.model.entity.Availability;
 import com.lodovicoazzini.reserve.model.entity.User;
 import com.lodovicoazzini.reserve.model.service.AvailabilityService;
+import com.lodovicoazzini.reserve.model.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import static java.lang.Long.parseLong;
 public class AvailabilityController {
 
     private final AvailabilityService availabilityService;
+    private final UserService userService;
 
     @GetMapping("create/{startTime}/{endTime}/{owner}")
     public ResponseEntity<String> createAvailability(
@@ -29,11 +31,12 @@ public class AvailabilityController {
             @PathVariable("owner") final String owner
     ) {
         final Availability availability;
+        final User matchedOwner = userService.listUsersLike(new User(owner)).stream().findFirst().orElse(new User(owner));
         try {
             availability = new Availability(
                     new Timestamp(parseLong(startTime)),
                     new Timestamp(parseLong(endTime)),
-                    new User(owner)
+                    matchedOwner
             );
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -83,6 +86,14 @@ public class AvailabilityController {
     @GetMapping("list")
     public ResponseEntity<String> listAvailabilities() {
         final List<Availability> availabilities = availabilityService.listAvailabilities();
+        return encodeResponse(availabilities, HttpStatus.OK);
+    }
+
+    @GetMapping("list/{owner}")
+    public ResponseEntity<String> listOwnerAvailabilities(@PathVariable("owner") final String owner) {
+        final Availability template = new Availability();
+        template.setOwner(new User(owner));
+        final List<Availability> availabilities = availabilityService.findAvailabilitiesLike(template);
         return encodeResponse(availabilities, HttpStatus.OK);
     }
 }
