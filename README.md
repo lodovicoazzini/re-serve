@@ -1,9 +1,21 @@
 # Run the web-application
 
-![](https://media.giphy.com/media/naxep4vNBAOL6/giphy.gif)
+![](https://media.giphy.com/media/71gKYlm6qNsuWnRrR2/giphy.gif)
 
-Run the command
+Clone the repository and cd into it.
 
-`docker-compose up -d`
+```
+git clone https://github.com/lodovicoazzini/re-serve
+cd re-serve
+```
 
-and open the browser at the link [http://localhost:8081](http://localhost:8081).
+Run the following command to create and start the dockerized application.
+
+```
+docker-compose up -d
+```
+
+Finally, open the browser at the link [http://localhost:8081](http://localhost:8081).
+
+Here you can find a small demo of how to use `RE-SERVE`.
+https://www.youtube.com/watch?v=GJJmKVf3pf8&feature=youtu.be
