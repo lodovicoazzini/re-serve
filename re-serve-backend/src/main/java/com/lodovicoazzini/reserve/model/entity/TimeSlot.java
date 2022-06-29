@@ -145,8 +145,8 @@ public interface TimeSlot extends Comparable<TimeSlot> {
      * @param <ThisType> The type of the slots, must extend TimeSlot
      * @return The overlapping slot if present, an empty optional otherwise
      */
-    default <ThisType extends TimeSlot> Optional<ThisType> getOverlap(
-            final ThisType other,
+    default <ThisType extends TimeSlot, OtherType extends TimeSlot> Optional<ThisType> getOverlap(
+            final OtherType other,
             final BiFunction<Timestamp, Timestamp, ThisType> generator) {
         final Optional<TimeSlot> overlap = Optional.ofNullable(this.combine(
                 other,
@@ -187,11 +187,13 @@ public interface TimeSlot extends Comparable<TimeSlot> {
                 other,
                 (original) -> original,
                 (first, second) -> {
-                    if (first.equals(second)) {
+                    if (this.getStartTime().equals(other.getStartTime()) && this.getEndTime().equals(other.getEndTime())) {
                         // Same duration -> deleted
                     } else if (this.equals(first)) {
                         // This starts first -> keep until the start of the second
-                        result.add(generator.apply(this.getStartTime(), second.getStartTime()));
+                        if (this.getStartTime().compareTo(other.getStartTime()) != 0) {
+                            result.add(generator.apply(this.getStartTime(), second.getStartTime()));
+                        }
                         if (this.getEndTime().compareTo(second.getEndTime()) > 0) {
                             // This ends after the second -> keep from the end of the second to the end of this
                             result.add(generator.apply(second.getEndTime(), this.getEndTime()));
@@ -224,7 +226,7 @@ public interface TimeSlot extends Comparable<TimeSlot> {
             final List<OtherType> others,
             final BiFunction<Timestamp, Timestamp, ThisType> generator
     ) {
-        List<ThisType> result = new ArrayList<>();
+        List<ThisType> result = List.of(generator.apply(this.getStartTime(), this.getEndTime()));
         for (OtherType other : others) {
             if (result.isEmpty()) {
                 // First iteration -> subtract from the original

@@ -16,7 +16,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.sql.Timestamp;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,7 +53,7 @@ class ReservationControllerTest {
         final String endTime = "2022-06-25 11:00:00";
         final String title = "my first reservation";
         final String email = "my.email@reserve.com";
-        when(this.reservationService.saveReservation(any(Reservation.class))).thenReturn(Optional.of(mockReservation));
+        when(this.reservationService.saveReservation(any(Reservation.class))).thenReturn(List.of(mockReservation));
         final ResponseEntity<String> response = reservationController.createReservation(
                 startTime,
                 endTime,
@@ -69,7 +70,7 @@ class ReservationControllerTest {
         final String endTime = "2022-06-25 11:00:00";
         final String title = "my first reservation";
         final String email = "my.email@reserve.com";
-        when(this.reservationService.saveReservation(any(Reservation.class))).thenReturn(Optional.empty());
+        when(this.reservationService.saveReservation(any(Reservation.class))).thenReturn(new ArrayList<>());
         final ResponseEntity<String> response = reservationController.createReservation(
                 startTime,
                 endTime,
@@ -86,7 +87,7 @@ class ReservationControllerTest {
         final String endTime = "2022-06-25 12:00:00";
         final String title = "my first reservation";
         final String email = "my.email@reserve.com";
-        when(this.reservationService.saveReservation(any(Reservation.class))).thenReturn(Optional.of(mockReservation));
+        when(this.reservationService.saveReservation(any(Reservation.class))).thenReturn(List.of(mockReservation));
         final ResponseEntity<String> response = reservationController.createReservation(
                 startTime,
                 endTime,

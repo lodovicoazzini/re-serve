@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,8 +23,9 @@ public class AvailabilityService {
         // Get the owner of the availability
         final User owner = availability.getOwner();
         // Get the list of the existing overlapping availabilities
-        final List<Availability> overlappingAvailabilities = owner.getAvailabilities().stream()
-                .filter(other -> other.getOverlapType(availability) != OverlapType.DISTINCT)
+        final List<Availability> overlappingAvailabilities = this.listAvailabilities().stream()
+                .filter(other -> availability.getOwner().equals(other.getOwner())
+                        && other.getOverlapType(availability) != OverlapType.DISTINCT)
                 .collect(Collectors.toList());
         // Merge the availability with the overlapping ones
         final Availability merged = availability.merge(
@@ -49,24 +49,6 @@ public class AvailabilityService {
 
     public void deleteAvailability(final Availability availability) {
         availabilityRepository.delete(availability);
-    }
-
-    public int subtractAvailability(final Availability availability) {
-        // Get the list of the existing availabilities that overlap the given one
-        final List<Availability> availabilities = this.listAvailabilities().stream()
-                .filter(saved -> saved.getOverlapType(availability) != OverlapType.DISTINCT)
-                .collect(Collectors.toList());
-        // Subtract the availability from the list and update the persisted value
-        availabilities.forEach(saved -> {
-            // Delete the saved availability
-            this.deleteAvailability(saved);
-            // Subtract the availability
-            final Optional<Availability> subtracted = saved.subtract(availability, availability::cloneWithSlot);
-            // If the availability is not completely deleted -> save the remainder
-            subtracted.ifPresent(this::saveAvailability);
-        });
-        // Return the number of affected availabilities
-        return availabilities.size();
     }
 
     public List<Availability> listAvailabilities() {

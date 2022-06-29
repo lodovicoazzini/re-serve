@@ -41,6 +41,7 @@ export default {
             getEvents: () => this.events,
             saveEvent: this.saveReservation,
             deleteEvent: this.deleteReservation,
+            updateTitle: this.updateReservationTitle,
         };
     },
     mounted() {
@@ -58,9 +59,18 @@ export default {
             );
         },
         deleteReservation(event) {
-            console.log('deleting the reservations');
             this.backendLink.get(
                 `reservation/remove/${event.start}/${event.end}/${this.userEmail}`,
+                () => this.reloadEvents(),
+                (message) => {
+                    console.log(message);
+                    this.reloadEvents();
+                }
+            );
+        },
+        updateReservationTitle(event) {
+            this.backendLink.get(
+                `reservation/updateTitle/${event.start}/${event.end}/${event.name}/${this.userEmail}/${this.calendarEmail}`,
                 () => this.reloadEvents(),
                 (message) => {
                     console.log(message);
@@ -86,7 +96,7 @@ export default {
                 (message) => console.log(message)
             );
             this.backendLink.get(
-                `user/listReservations/${this.calendarEmail}/${this.userEmail}`,
+                `user/listCommitments/${this.calendarEmail}/${this.userEmail}`,
                 (response) => {
                     const mapped = response.data.map((availability) => ({
                         start: availability.startTime,

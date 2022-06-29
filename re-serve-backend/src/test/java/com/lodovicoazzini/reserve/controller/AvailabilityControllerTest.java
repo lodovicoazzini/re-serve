@@ -52,7 +52,8 @@ class AvailabilityControllerTest {
         final String startTime = "2022-06-25 09:00:00";
         final String endTime = "2022-06-25 11:00:00";
         final String owner = "user@email.com";
-        when(this.availabilityService.saveAvailability(any(Availability.class))).thenReturn(mockAvailability);
+        when(this.availabilityService.saveAvailability(any(Availability.class)))
+                .thenReturn(List.of(new Availability[]{mockAvailability}));
         final ResponseEntity<String> response = this.availabilityController.createAvailability(startTime, endTime, owner);
         assertEquals(encodeResponse(mockAvailability, HttpStatus.CREATED), response);
     }
@@ -94,7 +95,8 @@ class AvailabilityControllerTest {
                 Timestamp.valueOf("2022-06-25 11:00:00"),
                 new User(owner)
         );
-        when(availabilityService.saveAvailability(any(Availability.class))).thenReturn(overlapping);
+        when(availabilityService.saveAvailability(any(Availability.class)))
+                .thenReturn(List.of(new Availability[]{overlapping}));
         final ResponseEntity<String> response = availabilityController.createAvailability(
                 startTime,
                 endTime,
@@ -113,7 +115,8 @@ class AvailabilityControllerTest {
                 Timestamp.valueOf(endTime),
                 new User(owner)
         );
-        when(availabilityService.saveAvailability(any(Availability.class))).thenReturn(duplicate);
+        when(availabilityService.saveAvailability(any(Availability.class)))
+                .thenReturn(List.of(new Availability[]{duplicate}));
         final ResponseEntity<String> response = availabilityController.createAvailability(
                 startTime,
                 endTime,
@@ -143,17 +146,6 @@ class AvailabilityControllerTest {
                 "user@email.com"
         );
         assertEquals(new ResponseEntity<>(0, HttpStatus.OK), response);
-    }
-
-    @Test
-    void testSubtractAvailability() {
-        when(availabilityService.subtractAvailability(any(Availability.class))).thenReturn(1);
-        final ResponseEntity<Integer> response = availabilityController.subtractAvailability(
-                "2022-06-25 09:00:00",
-                "2022-06-25 10:00:00",
-                "user@email.com"
-        );
-        assertEquals(new ResponseEntity<>(1, HttpStatus.OK), response);
     }
 
     @Test

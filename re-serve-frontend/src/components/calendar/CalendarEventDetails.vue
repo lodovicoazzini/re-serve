@@ -47,14 +47,14 @@ export default {
             return this.selectedEvent ? this.selectedEvent : {};
         },
     },
-    inject: ['saveEvent', 'deleteEvent'],
+    inject: ['saveEvent', 'deleteEvent', 'updateTitle'],
     emit: ['close-dialog'],
     methods: {
         closeDialog() {
             this.$emit('close-dialog');
         },
         saveCallback() {
-            this.saveCallback(this.safeEvent);
+            this.updateTitle(this.safeEvent);
             this.closeDialog();
         },
         deleteCallback() {

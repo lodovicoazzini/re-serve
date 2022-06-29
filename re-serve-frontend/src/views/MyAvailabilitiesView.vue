@@ -80,7 +80,7 @@ export default {
                 (message) => console.log(message)
             );
             this.backendLink.get(
-                `user/listReservations/${this.userEmail}`,
+                `user/listCommitments/${this.userEmail}`,
                 (response) => {
                     const mapped = response.data.map((availability) => ({
                         start: availability.startTime,

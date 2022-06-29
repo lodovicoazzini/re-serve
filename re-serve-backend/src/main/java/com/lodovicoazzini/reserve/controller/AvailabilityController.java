@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 import static com.lodovicoazzini.reserve.utils.ControllerUtils.encodeResponse;
 import static java.lang.Long.parseLong;
@@ -31,18 +32,21 @@ public class AvailabilityController {
             @PathVariable("owner") final String owner
     ) {
         final Availability availability;
-        final User matchedOwner = userService.listUsersLike(new User(owner)).stream().findFirst().orElse(new User(owner));
+        final Optional<User> matchedOwner = userService.findUsersLike(new User(owner)).stream().findFirst();
+        if (matchedOwner.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         try {
             availability = new Availability(
                     new Timestamp(parseLong(startTime)),
                     new Timestamp(parseLong(endTime)),
-                    matchedOwner
+                    matchedOwner.get()
             );
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
-        final Availability saved = availabilityService.saveAvailability(availability);
-        if (availability.equals(saved)) {
+        final List<Availability> saved = availabilityService.saveAvailability(availability);
+        if (saved.size() == 1 && availability.equals(saved.get(0))) {
             // No merge
             return encodeResponse(saved, HttpStatus.CREATED);
         } else {
@@ -65,22 +69,6 @@ public class AvailabilityController {
         final List<Availability> similar = availabilityService.findAvailabilitiesLike(availability);
         similar.forEach(availabilityService::deleteAvailability);
         return new ResponseEntity<>(similar.size(), HttpStatus.OK);
-    }
-
-    @GetMapping("subtract/{startTime}/{endTime}/{owner}")
-    public ResponseEntity<Integer> subtractAvailability(
-            @PathVariable("startTime") final String startTime,
-            @PathVariable("endTime") final String endTime,
-            @PathVariable("owner") final String owner
-    ) {
-        final Availability availability = new Availability(
-                Timestamp.valueOf(startTime),
-                Timestamp.valueOf(endTime),
-                new User(owner)
-        );
-        // Subtract the availabilities and count the affected entities
-        int affectedCount = availabilityService.subtractAvailability(availability);
-        return new ResponseEntity<>(affectedCount, HttpStatus.OK);
     }
 
     @GetMapping("list")
