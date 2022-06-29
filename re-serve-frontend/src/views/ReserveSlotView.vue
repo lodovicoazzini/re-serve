@@ -3,7 +3,7 @@
         <MyCalendar :eventColor="eventColor"></MyCalendar>
         <v-col cols="3">
             <div class="text-center ma-4">
-                <v-btn color="error" block dark @click="backCallback">
+                <v-btn color="primary" block dark @click="backCallback">
                     back
                 </v-btn>
             </div>

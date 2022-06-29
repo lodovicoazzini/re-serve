@@ -54,7 +54,7 @@ export default {
             this.$emit('close-dialog');
         },
         saveCallback() {
-            this.saveEvent(this.safeEvent);
+            this.saveCallback(this.safeEvent);
             this.closeDialog();
         },
         deleteCallback() {
