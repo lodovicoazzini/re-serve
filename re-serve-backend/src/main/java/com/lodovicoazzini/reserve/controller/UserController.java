@@ -1,6 +1,7 @@
 package com.lodovicoazzini.reserve.controller;
 
 import com.lodovicoazzini.reserve.model.entity.Availability;
+import com.lodovicoazzini.reserve.model.entity.Reservation;
 import com.lodovicoazzini.reserve.model.entity.User;
 import com.lodovicoazzini.reserve.model.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.lodovicoazzini.reserve.utils.ControllerUtils.encodeResponse;
 
@@ -25,7 +27,7 @@ public class UserController {
     @GetMapping("create/{email}")
     public ResponseEntity<String> createAvailability(@PathVariable("email") final String email) {
         final User newUser = new User(email);
-        if (userService.listUsersLike(newUser).stream().findFirst().isEmpty()) {
+        if (userService.findUsersLike(newUser).stream().findFirst().isEmpty()) {
             return encodeResponse(newUser, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.OK);
@@ -36,7 +38,7 @@ public class UserController {
     public ResponseEntity<String> listAvailabilities(
             @PathVariable("email") final String email
     ) {
-        final Optional<User> user = userService.listUsersLike(new User(email)).stream().findFirst();
+        final Optional<User> user = userService.findUsersLike(new User(email)).stream().findFirst();
         if (user.isEmpty()) {
             return encodeResponse(new ArrayList<>(), HttpStatus.OK);
         } else {
@@ -49,11 +51,40 @@ public class UserController {
     public ResponseEntity<String> listReservations(
             @PathVariable("email") final String email
     ) {
-        final Optional<User> user = userService.listUsersLike(new User(email)).stream().findFirst();
+        final Optional<User> user = userService.findUsersLike(new User(email)).stream().findFirst();
         if (user.isEmpty()) {
             return encodeResponse(new ArrayList<>(), HttpStatus.OK);
         } else {
             return encodeResponse(user.get().getReservations(), HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("listCommitments/{email}")
+    public ResponseEntity<String> listReservationsByUser(
+            @PathVariable("email") final String email
+    ) {
+        final Optional<User> user = userService.findUsersLike(new User(email)).stream().findFirst();
+        if (user.isEmpty()) {
+            return encodeResponse(new ArrayList<>(), HttpStatus.OK);
+        } else {
+            final List<Reservation> reservations = user.get().getCommitments();
+            return encodeResponse(reservations, HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("listCommitments/{email}/{bookedBy}")
+    public ResponseEntity<String> listReservationsByUser(
+            @PathVariable("email") final String email,
+            @PathVariable("bookedBy") final String bookedBy
+    ) {
+        final Optional<User> user = userService.findUsersLike(new User(email)).stream().findFirst();
+        if (user.isEmpty()) {
+            return encodeResponse(new ArrayList<>(), HttpStatus.OK);
+        } else {
+            final List<Reservation> reservations = user.get().getCommitments().stream()
+                    .filter(reservation -> reservation.getReservedBy().getEmail().equals(bookedBy))
+                    .collect(Collectors.toList());
+            return encodeResponse(reservations, HttpStatus.OK);
         }
     }
 }

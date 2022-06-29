@@ -26,7 +26,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public List<User> listUsersLike(final User user) {
+    public List<User> findUsersLike(final User user) {
         return userRepository.findAll(Example.of(user));
     }
 }
