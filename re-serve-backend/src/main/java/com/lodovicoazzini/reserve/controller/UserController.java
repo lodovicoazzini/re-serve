@@ -26,9 +26,10 @@ public class UserController {
 
     @GetMapping("create/{email}")
     public ResponseEntity<String> createAvailability(@PathVariable("email") final String email) {
-        final User newUser = new User(email);
-        if (userService.findUsersLike(newUser).stream().findFirst().isEmpty()) {
-            return encodeResponse(newUser, HttpStatus.CREATED);
+        final User user = new User(email);
+        final Optional<User> saved = userService.saveUser(user);
+        if (saved.isPresent()) {
+            return encodeResponse(saved, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.OK);
         }

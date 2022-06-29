@@ -7,6 +7,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -14,8 +15,12 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User saveUser(final User user) {
-        return userRepository.save(user);
+    public Optional<User> saveUser(final User user) {
+        try {
+            return Optional.of(userRepository.save(user));
+        } catch (Exception exception) {
+            return Optional.empty();
+        }
     }
 
     public void deleteUser(final User user) {
