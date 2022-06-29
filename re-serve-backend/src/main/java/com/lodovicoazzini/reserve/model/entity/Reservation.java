@@ -7,8 +7,10 @@ import java.util.Objects;
 @Entity(name = "reservation")
 @Table(
         name = "reservation",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "reservation_slot_unique", columnNames = {"start_time", "end_time"})})
+        uniqueConstraints = {@UniqueConstraint(
+                name = "reservation_slot_unique",
+                columnNames = {"start_time", "end_time", "reserved_by_id", "reserved_from_id"}
+        )})
 public class Reservation implements TimeSlot {
 
     @Id

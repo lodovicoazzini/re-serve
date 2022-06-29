@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,7 +59,7 @@ public class User {
     }
 
     public List<Availability> getAvailabilities() {
-        return availabilities;
+        return availabilities != null ? availabilities : new ArrayList<>();
     }
 
     public void addAvailability(final Availability availability) {
@@ -72,11 +71,11 @@ public class User {
     }
 
     public List<Reservation> getCommitments() {
-        return commitments;
+        return commitments != null ? commitments : new ArrayList<>();
     }
 
-    public Collection<Reservation> getReservations() {
-        return reservations;
+    public List<Reservation> getReservations() {
+        return reservations != null ? reservations : new ArrayList<>();
     }
 
     public void addReservation(final Reservation reservation) {
