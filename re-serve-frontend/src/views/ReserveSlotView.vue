@@ -89,6 +89,7 @@ export default {
                         name: null,
                         color: 'grey',
                         timed: true,
+                        type: 'user availability',
                         editable: false,
                     }));
                     this.events = this.events.concat(mapped);
@@ -104,6 +105,23 @@ export default {
                         name: availability.title,
                         color: this.eventColor,
                         timed: true,
+                        type: 'my reservation',
+                        editable: true,
+                    }));
+                    this.events = this.events.concat(mapped);
+                },
+                (message) => console.log(message)
+            );
+            this.backendLink.get(
+                `user/listAvailabilities/${this.userEmail}`,
+                (response) => {
+                    const mapped = response.data.map((availability) => ({
+                        start: availability.startTime,
+                        end: availability.endTime,
+                        name: availability.title,
+                        color: 'green',
+                        timed: true,
+                        type: 'my availability',
                         editable: true,
                     }));
                     this.events = this.events.concat(mapped);

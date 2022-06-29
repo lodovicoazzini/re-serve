@@ -52,14 +52,28 @@ export default {
             );
         },
         deleteEvent(event) {
-            this.backendLink.get(
-                `${event.type}/remove/${event.start}/${event.end}/${this.userEmail}`,
-                () => this.reloadEvents(),
-                (message) => {
-                    console.log(message);
-                    this.reloadEvents();
-                }
-            );
+            if (event.type === 'availability') {
+                this.backendLink.get(
+                    `availability/remove/${event.start}/${event.end}/${this.userEmail}`,
+                    () => this.reloadEvents(),
+                    (message) => {
+                        console.log(message);
+                        this.reloadEvents();
+                    }
+                );
+            } else {
+                console.log(
+                    `${event.type}/remove/${event.start}/${event.end}/${event.reservedBy.email}`
+                );
+                this.backendLink.get(
+                    `${event.type}/remove/${event.start}/${event.end}/${event.reservedBy.email}`,
+                    () => this.reloadEvents(),
+                    (message) => {
+                        console.log(message);
+                        this.reloadEvents();
+                    }
+                );
+            }
         },
         reloadEvents() {
             this.events = [];
@@ -82,13 +96,31 @@ export default {
             this.backendLink.get(
                 `user/listCommitments/${this.userEmail}`,
                 (response) => {
-                    const mapped = response.data.map((availability) => ({
-                        start: availability.startTime,
-                        end: availability.endTime,
+                    const mapped = response.data.map((commitment) => ({
+                        start: commitment.startTime,
+                        end: commitment.endTime,
                         name: null,
                         color: 'orange',
                         timed: true,
                         editable: true,
+                        reservedBy: commitment.reservedBy,
+                        type: 'reservation',
+                    }));
+                    this.events = this.events.concat(mapped);
+                },
+                (message) => console.log(message)
+            );
+            this.backendLink.get(
+                `user/listReservations/${this.userEmail}`,
+                (response) => {
+                    const mapped = response.data.map((commitment) => ({
+                        start: commitment.startTime,
+                        end: commitment.endTime,
+                        name: null,
+                        color: 'purple',
+                        timed: true,
+                        editable: true,
+                        reservedBy: commitment.reservedBy,
                         type: 'reservation',
                     }));
                     this.events = this.events.concat(mapped);

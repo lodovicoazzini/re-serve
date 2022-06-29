@@ -51,6 +51,20 @@
                 >>
             </v-dialog>
         </v-sheet>
+        <div class="ma-8">
+            <v-chip
+                v-for="item in legend"
+                :key="item"
+                class="ms-4"
+                :color="item.color"
+                outlined
+            >
+                <v-icon>mdi-palette</v-icon>
+                <v-span class="ml-1">
+                    {{ item.type }}
+                </v-span>
+            </v-chip>
+        </div>
     </v-col>
 </template>
 
@@ -86,6 +100,7 @@ export default {
         createEvent: null,
         createStart: null,
         extendOriginal: null,
+        items: ['one', 'two'],
     }),
     computed: {
         cal() {
@@ -102,6 +117,9 @@ export default {
         events() {
             return this.getEvents();
         },
+        legend() {
+            return this.uniqueArrayByKey(this.events, 'type');
+        },
     },
     mounted() {
         this.$refs.calendar.checkChange();
@@ -110,6 +128,11 @@ export default {
         this.updateTime();
     },
     methods: {
+        uniqueArrayByKey(array, key) {
+            return [
+                ...new Map(array.map((item) => [item[key], item])).values(),
+            ];
+        },
         viewDay({ date }) {
             this.focus = date;
             this.type = 'day';

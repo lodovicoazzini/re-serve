@@ -55,7 +55,6 @@ export default {
     methods: {
         submit() {
             this.$refs.observer.validate();
-            this.$store.commit('authenticate', this.email);
             this.backendLink.get(
                 `user/create/${this.email}`,
                 (response) => {
@@ -64,6 +63,7 @@ export default {
                     } else {
                         console.log(`user ${this.email} created`);
                     }
+                    this.$store.commit('authenticate', this.email);
                     this.$router
                         .push({ name: 'my-availabilities' })
                         .catch(() => {});
