@@ -1,12 +1,19 @@
 <template>
-    <v-row class="fill-height">
-        <MyCalendar :eventColor="eventColor"></MyCalendar>
-        <v-col cols="3">
-            <div class="text-center ma-4">
-                <ReserveDialog></ReserveDialog>
-            </div>
-        </v-col>
-    </v-row>
+    <v-col>
+        <v-row>
+            <v-span>
+                Click and drag on the calendar to create an availability.
+            </v-span>
+        </v-row>
+        <v-row class="fill-height">
+            <MyCalendar :eventColor="eventColor"></MyCalendar>
+            <v-col cols="3">
+                <div class="text-center ma-4">
+                    <ReserveDialog></ReserveDialog>
+                </div>
+            </v-col>
+        </v-row>
+    </v-col>
 </template>
 
 <script>

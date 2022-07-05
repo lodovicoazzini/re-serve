@@ -1,14 +1,23 @@
 <template>
-    <v-row class="fill-height">
-        <MyCalendar :eventColor="eventColor"></MyCalendar>
-        <v-col cols="3">
-            <div class="text-center ma-4">
-                <v-btn color="primary" block dark @click="backCallback">
-                    back
-                </v-btn>
-            </div>
-        </v-col>
-    </v-row>
+    <v-col>
+        <v-row>
+            <v-span>
+                Click and drag on the calendar to reserve a slot. <br />
+                Make sure to select an available time slot (i.e., colored in
+                grey).
+            </v-span>
+        </v-row>
+        <v-row class="fill-height">
+            <MyCalendar :eventColor="eventColor"></MyCalendar>
+            <v-col cols="3">
+                <div class="text-center ma-4">
+                    <v-btn color="primary" block dark @click="backCallback">
+                        back
+                    </v-btn>
+                </div>
+            </v-col>
+        </v-row>
+    </v-col>
 </template>
 
 <script>

@@ -20,6 +20,9 @@
             <v-btn class="ml-5" icon color="black" @click="callbackAbout">
                 <v-icon>mdi-information-outline</v-icon>
             </v-btn>
+            <v-btn class="ml-1" icon color="black" @click="callbackHelp">
+                <v-icon>mdi-head-question-outline</v-icon>
+            </v-btn>
         </v-app-bar>
 
         <v-main>
@@ -74,6 +77,9 @@ export default {
         },
         callbackAbout() {
             this.$router.push({ name: 'about' }).catch(() => {});
+        },
+        callbackHelp() {
+            this.$router.push({ name: 'help' }).catch(() => {});
         },
         homeCallback() {
             const destination = this.$store.getters.isAuthenticated
