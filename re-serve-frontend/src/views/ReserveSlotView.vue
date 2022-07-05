@@ -44,6 +44,7 @@ export default {
             updateTitle: this.updateReservationTitle,
         };
     },
+    inject: ['notify'],
     mounted() {
         this.reloadEvents();
     },
@@ -53,7 +54,7 @@ export default {
                 `reservation/create/${event.start}/${event.end}/${event.name}/${this.userEmail}/${this.calendarEmail}`,
                 () => this.reloadEvents(),
                 (message) => {
-                    console.log(message);
+                    this.notify(message, 'error');
                     this.reloadEvents();
                 }
             );
@@ -63,7 +64,7 @@ export default {
                 `reservation/remove/${event.start}/${event.end}/${this.userEmail}`,
                 () => this.reloadEvents(),
                 (message) => {
-                    console.log(message);
+                    this.notify(message, 'error');
                     this.reloadEvents();
                 }
             );
@@ -73,7 +74,7 @@ export default {
                 `reservation/updateTitle/${event.start}/${event.end}/${event.name}/${this.userEmail}/${this.calendarEmail}`,
                 () => this.reloadEvents(),
                 (message) => {
-                    console.log(message);
+                    this.notify(message, 'error');
                     this.reloadEvents();
                 }
             );
@@ -94,7 +95,7 @@ export default {
                     }));
                     this.events = this.events.concat(mapped);
                 },
-                (message) => console.log(message)
+                (message) => this.notify(message, 'error')
             );
             this.backendLink.get(
                 `user/listCommitments/${this.calendarEmail}/${this.userEmail}`,
@@ -110,7 +111,7 @@ export default {
                     }));
                     this.events = this.events.concat(mapped);
                 },
-                (message) => console.log(message)
+                (message) => this.notify(message, 'error')
             );
             this.backendLink.get(
                 `user/listAvailabilities/${this.userEmail}`,
@@ -126,7 +127,7 @@ export default {
                     }));
                     this.events = this.events.concat(mapped);
                 },
-                (message) => console.log(message)
+                (message) => this.notify(message, 'error')
             );
         },
         backCallback() {

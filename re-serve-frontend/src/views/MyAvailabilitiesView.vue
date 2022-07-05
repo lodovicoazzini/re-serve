@@ -37,6 +37,7 @@ export default {
             deleteEvent: this.deleteEvent,
         };
     },
+    inject: ['notify'],
     mounted() {
         this.reloadEvents();
     },
@@ -46,7 +47,7 @@ export default {
                 `availability/create/${event.start}/${event.end}/${this.userEmail}`,
                 () => this.reloadEvents(),
                 (message) => {
-                    console.log(message);
+                    this.notify(message, 'error');
                     this.reloadEvents();
                 }
             );
@@ -57,7 +58,7 @@ export default {
                     `availability/remove/${event.start}/${event.end}/${this.userEmail}`,
                     () => this.reloadEvents(),
                     (message) => {
-                        console.log(message);
+                        this.notify(message, 'error');
                         this.reloadEvents();
                     }
                 );
@@ -69,7 +70,7 @@ export default {
                     `${event.type}/remove/${event.start}/${event.end}/${event.reservedBy.email}`,
                     () => this.reloadEvents(),
                     (message) => {
-                        console.log(message);
+                        this.notify(message, 'error');
                         this.reloadEvents();
                     }
                 );
@@ -91,7 +92,7 @@ export default {
                     }));
                     this.events = this.events.concat(mapped);
                 },
-                (message) => console.log(message)
+                (message) => this.notify(message, 'error')
             );
             this.backendLink.get(
                 `user/listCommitments/${this.userEmail}`,
@@ -108,7 +109,7 @@ export default {
                     }));
                     this.events = this.events.concat(mapped);
                 },
-                (message) => console.log(message)
+                (message) => this.notify(message, 'error')
             );
             this.backendLink.get(
                 `user/listReservations/${this.userEmail}`,
@@ -125,7 +126,7 @@ export default {
                     }));
                     this.events = this.events.concat(mapped);
                 },
-                (message) => console.log(message)
+                (message) => this.notify(message, 'error')
             );
         },
     },

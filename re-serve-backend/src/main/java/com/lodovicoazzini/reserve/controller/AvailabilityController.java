@@ -43,7 +43,7 @@ public class AvailabilityController {
                     matchedOwner.get()
             );
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Please select a valid time interval", HttpStatus.UNAUTHORIZED);
         }
         final List<Availability> saved = availabilityService.saveAvailability(availability);
         if (saved.size() == 1 && availability.equals(saved.get(0))) {

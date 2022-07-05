@@ -52,12 +52,12 @@ public class ReservationController {
                     matchedReservedFrom
             );
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Please select a valid time interval", HttpStatus.UNAUTHORIZED);
         }
         final List<Reservation> saved = reservationService.saveReservation(reservation);
         if (saved.isEmpty()) {
             // No available slot -> notify frontend
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Please select a time interval corresponding to a reservation", HttpStatus.UNAUTHORIZED);
         } else {
             return encodeResponse(saved, HttpStatus.CREATED);
         }
@@ -75,13 +75,13 @@ public class ReservationController {
             reservation.setEndTime(new Timestamp(parseLong(endTime)));
             reservation.setReservedBy(new User(reservedBy));
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Please select a valid time interval", HttpStatus.UNAUTHORIZED);
         }
         // Find a reservation that matches the provided one
         final Optional<Reservation> match = reservationService.findReservationsLike(reservation).stream().findFirst();
         if (match.isEmpty()) {
             // No matching reservation -> notify frontend
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Reservation not found", HttpStatus.UNAUTHORIZED);
         } else {
             // Found matching reservation -> delete the reservation and update the availabilities
             final List<Availability> restored = reservationService.deleteReservation(match.get());

@@ -53,16 +53,16 @@
         </v-sheet>
         <div class="ma-8">
             <v-chip
-                v-for="item in legend"
-                :key="item"
+                v-for="(item, index) in legend"
+                :key="index"
                 class="ms-4"
                 :color="item.color"
                 outlined
             >
                 <v-icon>mdi-palette</v-icon>
-                <v-span class="ml-1">
+                <span class="ml-1">
                     {{ item.type }}
-                </v-span>
+                </span>
             </v-chip>
         </div>
     </v-col>

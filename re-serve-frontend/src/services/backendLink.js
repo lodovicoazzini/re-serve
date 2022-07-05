@@ -7,7 +7,10 @@ const get = async (url, successCallback, errorCallback) => {
         );
         await successCallback(response);
     } catch (error) {
-        const errorMessage = error.message || 'Ops! Something went wrong.';
+        const errorMessage =
+            error.response.data ||
+            error.message ||
+            'Ops! Something went wrong.';
         await errorCallback(errorMessage);
     }
     return;

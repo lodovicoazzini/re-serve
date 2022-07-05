@@ -52,6 +52,7 @@ export default {
     data: () => ({
         email: '',
     }),
+    inject: ['notify'],
     methods: {
         submit() {
             this.$refs.observer.validate();
@@ -59,16 +60,16 @@ export default {
                 `user/create/${this.email}`,
                 (response) => {
                     if (response.status === 200) {
-                        console.log('welcome back ' + this.email);
+                        this.notify('welcome back ' + this.email);
                     } else {
-                        console.log(`user ${this.email} created`);
+                        this.notify(`user ${this.email} created`);
                     }
                     this.$store.commit('authenticate', this.email);
                     this.$router
                         .push({ name: 'my-availabilities' })
                         .catch(() => {});
                 },
-                (message) => console.log(message)
+                (message) => this.notify(message)
             );
         },
     },

@@ -26,6 +26,20 @@
             <v-row class="ma-0 py-4 ps-8" justify="center">
                 <router-view />
             </v-row>
+            <v-snackbar v-model="snackbar" :timeout="timeout" :color="color">
+                {{ text }}
+
+                <template v-slot:action="{ attrs }">
+                    <v-btn
+                        color="white"
+                        text
+                        v-bind="attrs"
+                        @click="snackbar = false"
+                    >
+                        Close
+                    </v-btn>
+                </template>
+            </v-snackbar>
         </v-main>
 
         <v-footer padless>
@@ -42,7 +56,17 @@
 <script>
 export default {
     name: 'App',
-    data: () => ({}),
+    data: () => ({
+        snackbar: false,
+        text: '',
+        color: null,
+        timeout: 2000,
+    }),
+    provide() {
+        return {
+            notify: (message, color) => this.notify(message, color),
+        };
+    },
     methods: {
         backCallback() {
             this.$store.commit('authenticate', null);
@@ -56,6 +80,11 @@ export default {
                 ? 'my-availabilities'
                 : 'authenticate';
             this.$router.push({ name: destination }).catch(() => {});
+        },
+        notify(message, color) {
+            this.text = message;
+            this.snackbar = true;
+            this.color = color;
         },
     },
 };
